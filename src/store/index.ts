@@ -1,0 +1,5 @@
+export * from '@/store/modules/auth'
+export * from '@/store/modules/layout'
+export * from '@/store/modules/permission'
+export * from '@/store/modules/tabs'
+export * from '@/store/modules/user'
