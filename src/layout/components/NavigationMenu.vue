@@ -4,6 +4,7 @@
     :default-openeds="mode === 'vertical' ? openPaths : []"
     :style="menuStyle"
     :collapse="mode === 'vertical' && collapsed"
+    :collapse-transition="false"
     :mode="mode"
     :ellipsis="mode === 'horizontal'"
     unique-opened

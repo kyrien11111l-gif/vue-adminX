@@ -3,7 +3,7 @@
   <el-container class="relative h-screen bg-[var(--el-bg-color-page)]">
     <aside
       v-if="hasDesktopSidebar"
-      class="fixed inset-y-0 left-0 z-20 overflow-hidden bg-[var(--el-bg-color)] shadow-[var(--el-box-shadow-light)] transition-[width] duration-300 ease-in-out motion-reduce:transition-none"
+      class="fixed inset-y-0 left-0 z-20 overflow-hidden bg-[var(--el-bg-color)] shadow-[var(--el-box-shadow-light)] transition-[width] duration-300 ease-in-out"
       :style="sidebarStyle"
       aria-label="侧边导航区域"
     >
@@ -13,7 +13,8 @@
         :active-path="currentMenu?.key"
         :open-paths="defaultOpenKeys"
         :collapsed="layoutStore.collapsed"
-        @collapse="layoutStore.toggleCollapsed()"
+        :content-collapsed="navigationCollapsed"
+        @collapse="toggleSidebar"
       />
       <TwoColumnNavigation
         v-else-if="layoutStore.navigationStyle === TWO_COLUMN_NAVIGATION"
@@ -22,7 +23,8 @@
         :active-path="currentMenu?.key"
         :open-paths="defaultOpenKeys"
         :collapsed="layoutStore.collapsed"
-        @collapse="layoutStore.toggleCollapsed()"
+        :content-collapsed="navigationCollapsed"
+        @collapse="toggleSidebar"
       />
       <SideNavigation
         v-else-if="layoutStore.navigationStyle === MIXED_NAVIGATION && activeSidebarMenus.length"
@@ -31,7 +33,8 @@
         :active-path="currentMenu?.key"
         :open-paths="defaultOpenKeys"
         :collapsed="layoutStore.collapsed"
-        @collapse="layoutStore.toggleCollapsed()"
+        :content-collapsed="navigationCollapsed"
+        @collapse="toggleSidebar"
       />
     </aside>
 
@@ -107,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { CSSProperties } from 'vue'
 import { useRoute } from 'vue-router'
 import {
@@ -133,6 +136,8 @@ const layoutStore = useLayoutStore()
 const tabsStore = useTabsStore()
 const settingsOpen = ref(false)
 const refreshKey = ref(0)
+const navigationCollapsed = ref(layoutStore.collapsed)
+let navigationCollapseTimer: number | undefined
 const { matches } = useResponsiveLayout()
 const isMobile = computed(() => matches.value)
 const {
@@ -173,6 +178,23 @@ const sidebarStyle = computed<CSSProperties>(() => ({
 const mainStyle = computed<CSSProperties>(() => ({
   marginLeft: `${desktopSidebarWidth.value}px`
 }))
+
+function toggleSidebar() {
+  window.clearTimeout(navigationCollapseTimer)
+  layoutStore.toggleCollapsed()
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    navigationCollapsed.value = layoutStore.collapsed
+    return
+  }
+
+  navigationCollapseTimer = window.setTimeout(() => {
+    navigationCollapsed.value = layoutStore.collapsed
+    navigationCollapseTimer = undefined
+  }, 180)
+}
+
+onBeforeUnmount(() => window.clearTimeout(navigationCollapseTimer))
 
 watch(
   () => [route.path, route.meta.title, route.meta.affix] as const,

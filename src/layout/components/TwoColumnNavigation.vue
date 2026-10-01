@@ -27,6 +27,7 @@
       :active-path="activePath"
       :open-paths="openPaths"
       :collapsed="collapsed"
+      :content-collapsed="contentCollapsed"
       :show-brand="false"
       @navigate="$emit('navigate')"
       @collapse="$emit('collapse')"
@@ -50,6 +51,7 @@ const props = withDefaults(
     activePath?: string
     openPaths?: string[]
     collapsed?: boolean
+    contentCollapsed?: boolean
   }>(),
   { activePath: '', openPaths: () => [], collapsed: false }
 )

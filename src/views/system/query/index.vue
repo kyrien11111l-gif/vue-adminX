@@ -1,137 +1,118 @@
 <template>
-  <div class="page-shell flex min-h-full flex-col m-4">
-    <PageHeader title="数据查询" description="组合筛选业务任务，并对当前结果执行列设置与导出。">
-      <el-button :icon="Download" :disabled="!total" @click="exportCsv">导出 CSV</el-button>
-    </PageHeader>
-
-    <el-card shadow="never" class="mb-4 shrink-0">
-      <QueryForm
-        v-model="formValues"
-        :fields="fields"
-        :initial-values="initialValues"
-        :loading="loading"
-        :collapsed-count="4"
-        @submit="submitQuery"
-        @reset="resetQuery"
-        @options-error="onOptionsError"
-      >
-        <template #field-priority="{ model }">
-          <el-segmented v-model="model.priority" :options="priorityOptions" />
-        </template>
-      </QueryForm>
-    </el-card>
-
-    <el-card shadow="never" body-class="!p-0" class="min-h-0 flex-1">
-      <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <div class="flex items-center gap-3">
-          <span class="font-medium">查询结果</span>
-          <el-tag v-if="selectedRows.length" type="primary">已选择 {{ selectedRows.length }} 项</el-tag>
-          <span class="text-xs text-[var(--el-text-color-secondary)]">共 {{ total }} 条</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <el-tooltip content="刷新"><el-button text circle :icon="Refresh" aria-label="刷新查询结果" :loading="loading" @click="loadData" /></el-tooltip>
-          <el-dropdown @command="setDensity">
-            <el-button text><el-icon><Operation /></el-icon><span class="ml-1 hidden sm:inline">密度</span></el-button>
-            <template #dropdown><el-dropdown-menu><el-dropdown-item command="large">宽松</el-dropdown-item><el-dropdown-item command="default">默认</el-dropdown-item><el-dropdown-item command="small">紧凑</el-dropdown-item></el-dropdown-menu></template>
-          </el-dropdown>
-          <el-popover placement="bottom-end" :width="320" trigger="click">
-            <template #reference><el-button text :icon="Setting">列设置</el-button></template>
-            <div class="mb-2 flex items-center justify-between"><strong>显示与顺序</strong><el-button link type="primary" @click="resetColumns">重置</el-button></div>
-            <el-scrollbar max-height="340px">
-              <div v-for="(column, index) in columns" :key="column.key" class="flex items-center gap-2 border-b border-b-[var(--el-border-color-lighter)] py-2 last:border-0">
-                <el-checkbox v-model="column.visible" :disabled="column.required" class="min-w-0 flex-1">{{ column.label }}</el-checkbox>
-                <el-button text circle :icon="ArrowUp" :disabled="index === 0" aria-label="上移列" @click="moveColumn(index, -1)" />
-                <el-button text circle :icon="ArrowDown" :disabled="index === columns.length - 1" aria-label="下移列" @click="moveColumn(index, 1)" />
-                <el-dropdown @command="(value: string) => column.fixed = value as ColumnFixed">
-                  <el-button link>{{ fixedLabel(column.fixed) }}</el-button>
-                  <template #dropdown><el-dropdown-menu><el-dropdown-item command="">不固定</el-dropdown-item><el-dropdown-item command="left">左固定</el-dropdown-item><el-dropdown-item command="right">右固定</el-dropdown-item></el-dropdown-menu></template>
-                </el-dropdown>
-              </div>
-            </el-scrollbar>
-          </el-popover>
-        </div>
-      </div>
-
-      <el-table
-        v-loading="loading"
-        :data="rows"
-        row-key="id"
-        stripe
-        border
-        :size="density"
-        :empty-text="loadError || '暂无数据'"
-        @selection-change="selectedRows = $event"
-        @header-dragend="onHeaderDragEnd"
-      >
-        <el-table-column type="selection" width="44" fixed="left" />
-        <el-table-column
-          v-for="column in visibleColumns"
-          :key="column.key"
-          :prop="column.key"
-          :label="column.label"
-          :min-width="column.width"
-          :fixed="column.fixed || undefined"
-          :show-overflow-tooltip="column.key === 'description' || column.key === 'remark' || column.key === 'requestId'"
+  <PageContainer class="p-4">
+    <div class="flex min-h-0 flex-1 flex-col">
+      <el-card class="mb-4 shrink-0">
+        <QueryForm
+          v-model="formValues"
+          :fields="fields"
+          :initial-values="initialValues"
+          :loading="loading"
+          :collapsed-count="4"
+          @submit="submitQuery"
+          @reset="resetQuery"
+          @options-error="onOptionsError"
         >
-          <template #header>
-            <div class="flex items-center gap-1">
-              <span>{{ column.label }}</span>
-              <el-popover v-if="column.filterable" placement="bottom" :width="220" trigger="click">
-                <template #reference><el-button text circle size="small" :icon="Filter" :aria-label="`筛选${column.label}`" /></template>
-                <el-input v-model="headerFilters[column.key]" clearable :placeholder="`筛选${column.label}`" @keyup.enter="applyHeaderFilter" />
-                <div class="mt-3 flex justify-end gap-2"><el-button size="small" @click="clearHeaderFilter(column.key)">清除</el-button><el-button size="small" type="primary" @click="applyHeaderFilter">应用</el-button></div>
+          <template #field-priority="{ model }">
+            <el-segmented v-model="model.priority" :options="priorityOptions" />
+          </template>
+        </QueryForm>
+      </el-card>
+
+      <el-card body-class="!p-0 !overflow-hidden flex h-full min-h-0 flex-col" class="min-h-0 flex-1">
+        <TableToolbar
+          title="查询结果"
+          refreshable
+          :refreshing="loading"
+          :density="density"
+          :column-settings="columns"
+          @refresh="loadData"
+          @update:density="setDensity"
+          @update:column-settings="setColumnSettings"
+          @column-settings-reset="resetColumnSettings"
+        >
+          <template #actions>
+            <el-tag v-if="selectedRows.length" type="primary">已选择 {{ selectedRows.length }} 项</el-tag>
+            <span class="text-xs text-[var(--el-text-color-secondary)]">共 {{ total }} 条</span>
+          </template>
+        </TableToolbar>
+
+        <CommonTable
+          v-loading="loading"
+          :data="rows"
+          :columns="tableColumns"
+          :empty-text="loadError || '暂无数据'"
+          row-key="id"
+          stripe
+          border
+          :size="density"
+          :pagination="{ currentPage: pageCurrent, pageSize, total }"
+          @selection-change="selectedRows = $event"
+          @pagination-current-change="onPageChange"
+          @pagination-size-change="onPageSizeChange"
+        >
+          <template #filter-header="{ columnConfig }">
+            <div class="flex items-center justify-center gap-1">
+              <span>{{ columnConfig.label }}</span>
+              <el-popover placement="bottom" :width="220" trigger="click">
+                <template #reference><el-button text circle size="small" :icon="Filter" :aria-label="`筛选${columnConfig.label}`" /></template>
+                <el-input
+                  :model-value="headerFilters[getColumnKey(columnConfig)]"
+                  clearable
+                  :placeholder="`筛选${columnConfig.label}`"
+                  @update:model-value="setHeaderFilter(getColumnKey(columnConfig), $event)"
+                  @keyup.enter="applyHeaderFilter"
+                />
+                <div class="mt-3 flex justify-end gap-2"><el-button size="small" @click="clearHeaderFilter(getColumnKey(columnConfig))">清除</el-button><el-button size="small" type="primary" @click="applyHeaderFilter">应用</el-button></div>
               </el-popover>
             </div>
           </template>
-          <template #default="{ row }">
-            <el-tag v-if="column.key === 'status'" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
-            <el-tag v-else-if="column.key === 'priority'" :type="priorityType(row.priority)" effect="plain">{{ priorityLabel(row.priority) }}</el-tag>
-            <span v-else-if="column.key === 'category'">{{ categoryLabel(row.category) }}</span>
-            <span v-else>{{ row[column.key] }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="92" fixed="right"><template #default="{ row }"><el-button link type="primary" @click="showDetail(row)">查看</el-button></template></el-table-column>
-      </el-table>
-      <div class="flex justify-end p-4">
-        <el-pagination
-          v-model:current-page="pageCurrent"
-          v-model:page-size="pageSize"
-          :page-sizes="[20, 50, 100, 200]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          @current-change="loadData"
-          @size-change="onPageSizeChange"
-        />
-      </div>
-    </el-card>
+          <template #category="{ row }">{{ categoryLabel(row.category) }}</template>
+          <template #status="{ row }"><el-tag :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag></template>
+          <template #priority="{ row }"><el-tag :type="priorityType(row.priority)" effect="plain">{{ priorityLabel(row.priority) }}</el-tag></template>
+          <template #operation="{ row }"><el-button link type="primary" @click="showDetail(row)">查看</el-button></template>
+        </CommonTable>
+      </el-card>
 
-    <el-dialog v-model="detailOpen" title="任务详情" width="min(680px, 92vw)">
-      <el-descriptions v-if="activeRow" :column="1" border>
-        <el-descriptions-item label="工单号">{{ activeRow.orderNo }}</el-descriptions-item>
-        <el-descriptions-item label="请求 ID">{{ activeRow.requestId }}</el-descriptions-item>
-        <el-descriptions-item label="标题">{{ activeRow.title }}</el-descriptions-item>
-        <el-descriptions-item label="说明">{{ activeRow.description }}</el-descriptions-item>
-        <el-descriptions-item label="备注">{{ activeRow.remark }}</el-descriptions-item>
-      </el-descriptions>
-      <template #footer><el-button type="primary" @click="detailOpen = false">关闭</el-button></template>
-    </el-dialog>
-  </div>
+      <el-dialog v-model="detailOpen" title="任务详情" width="min(680px, 92vw)">
+        <el-descriptions v-if="activeRow" :column="1" border>
+          <el-descriptions-item label="工单号">{{ activeRow.orderNo }}</el-descriptions-item>
+          <el-descriptions-item label="请求 ID">{{ activeRow.requestId }}</el-descriptions-item>
+          <el-descriptions-item label="标题">{{ activeRow.title }}</el-descriptions-item>
+          <el-descriptions-item label="说明">{{ activeRow.description }}</el-descriptions-item>
+          <el-descriptions-item label="备注">{{ activeRow.remark }}</el-descriptions-item>
+        </el-descriptions>
+        <template #footer><el-button type="primary" @click="detailOpen = false">关闭</el-button></template>
+      </el-dialog>
+    </div>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
-import { ArrowDown, ArrowUp, Download, Filter, Operation, Refresh, Setting } from '@element-plus/icons-vue'
+import { Filter } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import type { ComponentSize, TagProps } from 'element-plus'
+import type { TagProps } from 'element-plus'
 import { queryData } from '@/api'
-import PageHeader from '@/components/PageHeader.vue'
+import { CommonTable } from '@/components/common-table'
+import type { CommonTableColumn } from '@/components/common-table'
+import { PageContainer } from '@/components/page-container'
 import { QueryForm } from '@/components/query-form'
 import type { QueryFormField, QueryFormModel } from '@/components/query-form'
+import { TableToolbar } from '@/components/table-toolbar'
+import type { TableColumnSetting } from '@/components/table-toolbar'
+import { useTableSettings } from '@/hooks/useTableSettings'
 import type { QueryFilters, QueryPriority, QueryRow, QueryStatus } from '@/types'
 
-type ColumnKey = keyof QueryRow
-type ColumnFixed = '' | 'left' | 'right'
-interface ColumnSetting { key: ColumnKey; label: string; width: number; visible: boolean; required?: boolean; filterable?: boolean; fixed: ColumnFixed }
+type DataColumnKey = keyof QueryRow
+type ColumnKey = DataColumnKey | 'operation'
+interface ColumnSetting extends TableColumnSetting {
+  key: ColumnKey
+  minWidth: number
+  prop?: DataColumnKey
+  slot?: string
+  headerSlot?: string
+  showOverflowTooltip?: boolean
+}
 type TagType = TagProps['type']
 
 const initialValues: QueryFormModel = { keyword: '', category: '', status: '', dateRange: [], department: '', processor: '', priority: 'all' }
@@ -143,7 +124,6 @@ const rows = ref<QueryRow[]>([])
 const total = ref(0)
 const pageCurrent = ref(1)
 const pageSize = ref(20)
-const density = ref<ComponentSize>('default')
 const selectedRows = ref<QueryRow[]>([])
 const detailOpen = ref(false)
 const activeRow = ref<QueryRow>()
@@ -166,23 +146,34 @@ const fields: QueryFormField[] = [
 ]
 const priorityOptions = [{ label: '全部', value: 'all' }, { label: '高', value: 'high' }, { label: '中', value: 'medium' }, { label: '低', value: 'low' }]
 const defaultColumns: ColumnSetting[] = [
-  { key: 'orderNo', label: '工单号', width: 150, visible: true, required: true, filterable: true, fixed: 'left' },
-  { key: 'title', label: '任务标题', width: 190, visible: true, filterable: true, fixed: '' },
-  { key: 'requestId', label: '请求 ID', width: 220, visible: true, filterable: true, fixed: '' },
-  { key: 'category', label: '类型', width: 120, visible: true, fixed: '' },
-  { key: 'applicant', label: '申请人', width: 110, visible: true, filterable: true, fixed: '' },
-  { key: 'department', label: '部门', width: 130, visible: true, filterable: true, fixed: '' },
-  { key: 'status', label: '状态', width: 110, visible: true, fixed: '' },
-  { key: 'priority', label: '优先级', width: 100, visible: true, fixed: '' },
-  { key: 'processor', label: '处理人', width: 110, visible: true, filterable: true, fixed: '' },
-  { key: 'updatedAt', label: '更新时间', width: 165, visible: true, fixed: '' },
-  { key: 'description', label: '任务说明', width: 260, visible: false, filterable: true, fixed: '' },
-  { key: 'remark', label: '备注', width: 260, visible: false, filterable: true, fixed: '' },
-  { key: 'source', label: '来源', width: 100, visible: false, fixed: '' },
-  { key: 'duration', label: '耗时', width: 100, visible: false, fixed: '' }
+  { key: 'orderNo', prop: 'orderNo', label: '工单号', minWidth: 150, visible: true, disabled: true, fixed: 'left', headerSlot: 'filter-header' },
+  { key: 'title', prop: 'title', label: '任务标题', minWidth: 190, visible: true, fixed: '', headerSlot: 'filter-header' },
+  { key: 'requestId', prop: 'requestId', label: '请求 ID', minWidth: 220, visible: true, fixed: '', headerSlot: 'filter-header', showOverflowTooltip: true },
+  { key: 'category', prop: 'category', label: '类型', minWidth: 120, visible: true, fixed: '', slot: 'category' },
+  { key: 'applicant', prop: 'applicant', label: '申请人', minWidth: 110, visible: true, fixed: '', headerSlot: 'filter-header' },
+  { key: 'department', prop: 'department', label: '部门', minWidth: 130, visible: true, fixed: '', headerSlot: 'filter-header' },
+  { key: 'status', prop: 'status', label: '状态', minWidth: 110, visible: true, fixed: '', slot: 'status' },
+  { key: 'priority', prop: 'priority', label: '优先级', minWidth: 100, visible: true, fixed: '', slot: 'priority' },
+  { key: 'processor', prop: 'processor', label: '处理人', minWidth: 110, visible: true, fixed: '', headerSlot: 'filter-header' },
+  { key: 'updatedAt', prop: 'updatedAt', label: '更新时间', minWidth: 165, visible: true, fixed: '' },
+  { key: 'description', prop: 'description', label: '任务说明', minWidth: 260, visible: false, fixed: '', headerSlot: 'filter-header', showOverflowTooltip: true },
+  { key: 'remark', prop: 'remark', label: '备注', minWidth: 260, visible: false, fixed: '', headerSlot: 'filter-header', showOverflowTooltip: true },
+  { key: 'source', prop: 'source', label: '来源', minWidth: 100, visible: false, fixed: '' },
+  { key: 'duration', prop: 'duration', label: '耗时', minWidth: 100, visible: false, fixed: '' },
+  { key: 'operation', label: '操作', minWidth: 92, visible: true, fixed: 'right', slot: 'operation' }
 ]
-const columns = ref(defaultColumns.map((item) => ({ ...item })))
-const visibleColumns = computed(() => columns.value.filter((item) => item.visible))
+const {
+  density,
+  columnSettings: columns,
+  visibleColumns,
+  setDensity,
+  setColumnSettings,
+  resetColumnSettings
+} = useTableSettings({ columns: defaultColumns })
+const tableColumns = computed<CommonTableColumn[]>(() => [
+  { key: 'selection', type: 'selection', width: 44, fixed: 'left' },
+  ...visibleColumns.value.map((column) => column as CommonTableColumn)
+])
 const headerFilters = reactive<Partial<Record<ColumnKey, string>>>({})
 const statusMeta: Record<QueryStatus, { label: string; type: TagType }> = {
   pending: { label: '待处理', type: 'warning' }, processing: { label: '处理中', type: 'primary' }, completed: { label: '已完成', type: 'success' }, failed: { label: '失败', type: 'danger' }
@@ -225,30 +216,22 @@ function submitQuery(value: QueryFormModel) { submittedValues.value = { ...value
 function resetQuery(value: QueryFormModel) { submittedValues.value = { ...value }; Object.keys(headerFilters).forEach((key) => delete headerFilters[key as ColumnKey]); pageCurrent.value = 1; void loadData() }
 function applyHeaderFilter() { pageCurrent.value = 1; void loadData() }
 function clearHeaderFilter(key: ColumnKey) { delete headerFilters[key]; applyHeaderFilter() }
-function onPageSizeChange() { pageCurrent.value = 1; void loadData() }
-function setDensity(command: string) { density.value = command as ComponentSize }
-function moveColumn(index: number, offset: number) { const target = index + offset; if (target < 0 || target >= columns.value.length) return; const [item] = columns.value.splice(index, 1); if (item) columns.value.splice(target, 0, item) }
-function resetColumns() { columns.value = defaultColumns.map((item) => ({ ...item })) }
-function fixedLabel(value: ColumnFixed) { return value === 'left' ? '左固定' : value === 'right' ? '右固定' : '不固定' }
+function getColumnKey(column: CommonTableColumn): ColumnKey { return column.key as ColumnKey }
+function setHeaderFilter(key: ColumnKey, value: string) { headerFilters[key] = value }
+function onPageChange(value: number) { pageCurrent.value = value; void loadData() }
+function onPageSizeChange(value: number) { pageSize.value = value; pageCurrent.value = 1; void loadData() }
 function statusType(value: unknown): TagType { return statusMeta[value as QueryStatus]?.type ?? 'info' }
 function statusLabel(value: unknown): string { return statusMeta[value as QueryStatus]?.label ?? String(value) }
 function priorityType(value: unknown): TagType { return priorityMeta[value as QueryPriority]?.type ?? 'info' }
 function priorityLabel(value: unknown): string { return priorityMeta[value as QueryPriority]?.label ?? String(value) }
 function categoryLabel(value: unknown): string { return categoryLabels[value as keyof typeof categoryLabels] ?? String(value) }
-function onHeaderDragEnd(newWidth: number, _oldWidth: number, column: { property?: string }) { const setting = columns.value.find((item) => item.key === column.property); if (setting) setting.width = newWidth }
 function showDetail(row: QueryRow) { activeRow.value = row; detailOpen.value = true }
 function onOptionsError() { ElMessage.warning('异步选项加载失败，可再次展开重试') }
 
-function exportCsv() {
-  const exportRows = selectedRows.value.length ? selectedRows.value : rows.value
-  const exportColumns = visibleColumns.value
-  const escape = (value: unknown) => `"${String(value ?? '').replaceAll('"', '""')}"`
-  const csv = [exportColumns.map((item) => escape(item.label)).join(','), ...exportRows.map((row) => exportColumns.map((item) => escape(row[item.key])).join(','))].join('\r\n')
-  const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }))
-  const anchor = document.createElement('a'); anchor.href = url; anchor.download = `adminx-query-${Date.now()}.csv`; anchor.click(); URL.revokeObjectURL(url)
-  ElMessage.success(`已导出 ${exportRows.length} 条记录`)
-}
 
-onMounted(loadData)
+
+onMounted(() => {
+  void loadData()
+})
 onBeforeUnmount(() => controller?.abort())
 </script>
