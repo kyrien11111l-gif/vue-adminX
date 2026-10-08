@@ -50,12 +50,6 @@ export function applyThemeSnapshot(
   document.documentElement.classList.toggle('dark', dark)
   document.documentElement.dataset.theme = dark ? 'dark' : 'light'
   document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
-  document.documentElement.style.setProperty(
-    '--app-background',
-    dark
-      ? 'var(--el-bg-color-page, #141414)'
-      : 'var(--el-bg-color-page, #ffffff)'
-  )
   applyPrimaryColor(state.themeColorPrimary, dark)
   return dark
 }
