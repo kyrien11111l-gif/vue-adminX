@@ -38,20 +38,22 @@
     </div>
 
     <div v-if="paginationConfig" class="common-table__pagination shrink-0">
-      <slot name="pagination" :current-page="currentPage" :page-size="pageSize">
-        <el-pagination
-          v-bind="paginationProps"
-          :current-page="currentPage"
-          :page-size="pageSize"
-          @update:current-page="onCurrentPageUpdate"
-          @update:page-size="onPageSizeUpdate"
-          @current-change="onPaginationCurrentChange"
-          @size-change="onPaginationSizeChange"
-          @change="onPaginationChange"
-          @prev-click="onPaginationPrevClick"
-          @next-click="onPaginationNextClick"
-        />
-      </slot>
+      <el-scrollbar>
+        <slot name="pagination" :current-page="currentPage" :page-size="pageSize">
+          <el-pagination
+            v-bind="paginationProps"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            @update:current-page="onCurrentPageUpdate"
+            @update:page-size="onPageSizeUpdate"
+            @current-change="onPaginationCurrentChange"
+            @size-change="onPaginationSizeChange"
+            @change="onPaginationChange"
+            @prev-click="onPaginationPrevClick"
+            @next-click="onPaginationNextClick"
+          />
+        </slot>
+      </el-scrollbar>
     </div>
   </div>
 </template>

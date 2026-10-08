@@ -1,5 +1,5 @@
 <template>
-  <el-drawer v-model="visible" direction="ltr" :with-header="false" size="min(300px, 86vw)" class="mobile-navigation">
+  <el-drawer v-model="visible" direction="ltr" :with-header="false" size="210px" class="mobile-navigation">
     <BrandLogo />
     <el-scrollbar :style="{ height: `calc(100vh - ${layoutStore.headerHeight}px)` }">
       <NavigationMenu
