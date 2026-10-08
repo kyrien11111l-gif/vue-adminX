@@ -13,6 +13,15 @@ const defaultColumns: TestColumn[] = [
 ]
 
 describe('useTableColumns', () => {
+  it('defaults omitted visibility and fixed position', () => {
+    const { columnSettings, visibleColumns } = useTableColumns({
+      columns: [{ key: 'defaulted', label: '默认列' }]
+    })
+
+    expect(columnSettings.value[0]).toMatchObject({ visible: true, fixed: '' })
+    expect(visibleColumns.value.map((column) => column.key)).toEqual(['defaulted'])
+  })
+
   it('returns visible columns ordered by fixed position', () => {
     const { tableColumns } = useTableColumns({ columns: defaultColumns })
     expect(tableColumns.value.map((column) => column.key)).toEqual(['left', 'normal', 'right'])

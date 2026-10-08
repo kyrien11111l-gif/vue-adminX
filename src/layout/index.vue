@@ -89,7 +89,12 @@
           >
             <router-view v-slot="{ Component }">
               <transition name="page" mode="out-in">
-                <component :is="Component" :key="`${route.fullPath}:${refreshKey}`" />
+                <KeepAlive :include="keepAliveRouteNames">
+                  <component
+                    :is="getRouteViewComponent(Component, route.name)"
+                    :key="`${route.fullPath}:${refreshKey}`"
+                  />
+                </KeepAlive>
               </transition>
             </router-view>
           </el-watermark>
@@ -110,9 +115,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import type { CSSProperties } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, defineComponent, h, onBeforeUnmount, ref, watch } from 'vue'
+import type { Component as VueComponent, CSSProperties } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import {
   MIXED_NAVIGATION,
   SIDE_NAVIGATION,
@@ -132,10 +137,13 @@ import SideNavigation from './components/SideNavigation.vue'
 import TwoColumnNavigation from './components/TwoColumnNavigation.vue'
 
 const route = useRoute()
+const router = useRouter()
 const layoutStore = useLayoutStore()
 const tabsStore = useTabsStore()
 const settingsOpen = ref(false)
 const refreshKey = ref(0)
+const keepAliveRouteNames = ref<string[]>([])
+const routeViewComponents = new Map<string, VueComponent>()
 const navigationCollapsed = ref(layoutStore.collapsed)
 let navigationCollapseTimer: number | undefined
 const { matches } = useResponsiveLayout()
@@ -179,6 +187,34 @@ const mainStyle = computed<CSSProperties>(() => ({
   marginLeft: `${desktopSidebarWidth.value}px`
 }))
 
+function syncKeepAliveRouteNames() {
+  keepAliveRouteNames.value = router
+    .getRoutes()
+    .filter((record) => record.meta.keepAlive && typeof record.name === 'string')
+    .map((record) => String(record.name))
+}
+
+function getRouteViewComponent(
+  component: VueComponent,
+  routeName: string | symbol | null | undefined
+): VueComponent {
+  const componentName =
+    typeof routeName === 'string'
+      ? routeName
+      : `route-${route.path.replace(/[^a-zA-Z0-9_-]/g, '-')}`
+  const cachedComponent = routeViewComponents.get(componentName)
+  if (cachedComponent) return cachedComponent
+
+  const routeViewComponent = defineComponent({
+    name: componentName,
+    setup() {
+      return () => h(component)
+    }
+  })
+  routeViewComponents.set(componentName, routeViewComponent)
+  return routeViewComponent
+}
+
 function toggleSidebar() {
   window.clearTimeout(navigationCollapseTimer)
   layoutStore.toggleCollapsed()
@@ -195,6 +231,12 @@ function toggleSidebar() {
 }
 
 onBeforeUnmount(() => window.clearTimeout(navigationCollapseTimer))
+
+watch(
+  () => route.fullPath,
+  syncKeepAliveRouteNames,
+  { immediate: true }
+)
 
 watch(
   () => [route.path, route.meta.title, route.meta.affix] as const,

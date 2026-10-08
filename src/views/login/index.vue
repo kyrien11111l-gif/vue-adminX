@@ -74,7 +74,7 @@ async function submit() {
     authStore.setToken(result.token)
     ElMessage.success('登录成功')
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : undefined
-    await router.replace(getSafeRedirectTarget(redirect, '/dashboard'))
+    await router.replace(getSafeRedirectTarget(redirect, '/'))
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '登录失败')
   } finally {

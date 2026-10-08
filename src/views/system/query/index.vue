@@ -146,21 +146,21 @@ const fields: QueryFormField[] = [
 ]
 const priorityOptions = [{ label: '全部', value: 'all' }, { label: '高', value: 'high' }, { label: '中', value: 'medium' }, { label: '低', value: 'low' }]
 const defaultColumns: ColumnSetting[] = [
-  { key: 'orderNo', prop: 'orderNo', label: '工单号', minWidth: 150, visible: true, disabled: true, fixed: 'left', headerSlot: 'filter-header' },
-  { key: 'title', prop: 'title', label: '任务标题', minWidth: 190, visible: true, fixed: '', headerSlot: 'filter-header' },
-  { key: 'requestId', prop: 'requestId', label: '请求 ID', minWidth: 220, visible: true, fixed: '', headerSlot: 'filter-header', showOverflowTooltip: true },
-  { key: 'category', prop: 'category', label: '类型', minWidth: 120, visible: true, fixed: '', slot: 'category' },
-  { key: 'applicant', prop: 'applicant', label: '申请人', minWidth: 110, visible: true, fixed: '', headerSlot: 'filter-header' },
-  { key: 'department', prop: 'department', label: '部门', minWidth: 130, visible: true, fixed: '', headerSlot: 'filter-header' },
-  { key: 'status', prop: 'status', label: '状态', minWidth: 110, visible: true, fixed: '', slot: 'status' },
-  { key: 'priority', prop: 'priority', label: '优先级', minWidth: 100, visible: true, fixed: '', slot: 'priority' },
-  { key: 'processor', prop: 'processor', label: '处理人', minWidth: 110, visible: true, fixed: '', headerSlot: 'filter-header' },
-  { key: 'updatedAt', prop: 'updatedAt', label: '更新时间', minWidth: 165, visible: true, fixed: '' },
-  { key: 'description', prop: 'description', label: '任务说明', minWidth: 260, visible: false, fixed: '', headerSlot: 'filter-header', showOverflowTooltip: true },
-  { key: 'remark', prop: 'remark', label: '备注', minWidth: 260, visible: false, fixed: '', headerSlot: 'filter-header', showOverflowTooltip: true },
-  { key: 'source', prop: 'source', label: '来源', minWidth: 100, visible: false, fixed: '' },
-  { key: 'duration', prop: 'duration', label: '耗时', minWidth: 100, visible: false, fixed: '' },
-  { key: 'operation', label: '操作', minWidth: 92, visible: true, fixed: 'right', slot: 'operation' }
+  { key: 'orderNo', prop: 'orderNo', label: '工单号', minWidth: 150, disabled: true, fixed: 'left', headerSlot: 'filter-header' },
+  { key: 'title', prop: 'title', label: '任务标题', minWidth: 190, headerSlot: 'filter-header' },
+  { key: 'requestId', prop: 'requestId', label: '请求 ID', minWidth: 220, headerSlot: 'filter-header', showOverflowTooltip: true },
+  { key: 'category', prop: 'category', label: '类型', minWidth: 120, slot: 'category' },
+  { key: 'applicant', prop: 'applicant', label: '申请人', minWidth: 110, headerSlot: 'filter-header' },
+  { key: 'department', prop: 'department', label: '部门', minWidth: 130, headerSlot: 'filter-header' },
+  { key: 'status', prop: 'status', label: '状态', minWidth: 110, slot: 'status' },
+  { key: 'priority', prop: 'priority', label: '优先级', minWidth: 100, slot: 'priority' },
+  { key: 'processor', prop: 'processor', label: '处理人', minWidth: 110, headerSlot: 'filter-header' },
+  { key: 'updatedAt', prop: 'updatedAt', label: '更新时间', minWidth: 165 },
+  { key: 'description', prop: 'description', label: '任务说明', minWidth: 260, headerSlot: 'filter-header', showOverflowTooltip: true },
+  { key: 'remark', prop: 'remark', label: '备注', minWidth: 260, headerSlot: 'filter-header', showOverflowTooltip: true },
+  { key: 'source', prop: 'source', label: '来源', minWidth: 100 },
+  { key: 'duration', prop: 'duration', label: '耗时', minWidth: 100 },
+  { key: 'operation', label: '操作', minWidth: 92, fixed: 'right', slot: 'operation' }
 ]
 const {
   density,

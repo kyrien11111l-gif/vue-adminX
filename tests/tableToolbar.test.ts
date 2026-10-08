@@ -95,7 +95,9 @@ describe('TableToolbar', () => {
     const fixed = wrapper.emitted('update:column-settings')?.[1]?.[0] as TableColumnSetting[]
     expect(fixed.find((item) => item.key === 'first')?.fixed).toBe('right')
 
-    await wrapper.get('.table-column-settings__header button').trigger('click')
+    const resetButton = wrapper.findAll('button').find((button) => button.text() === '重置')
+    expect(resetButton).toBeDefined()
+    await resetButton?.trigger('click')
     expect(wrapper.emitted('column-settings-reset')).toHaveLength(1)
   })
 })

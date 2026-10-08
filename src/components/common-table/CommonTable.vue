@@ -263,4 +263,8 @@ defineExpose({
   text-align: center;
   vertical-align: middle;
 }
+
+.common-table :deep(.el-table th.el-table__cell) {
+  color: var(--el-text-color-primary);
+}
 </style>

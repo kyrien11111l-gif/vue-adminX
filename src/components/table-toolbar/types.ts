@@ -6,8 +6,10 @@ export type TableColumnFixed = '' | 'left' | 'right'
 export interface TableColumnSetting {
   key: string
   label: string
-  visible: boolean
-  fixed: TableColumnFixed
+  /** 是否显示该列，省略时默认为 true。 */
+  visible?: boolean
+  /** 固定位置，省略时默认为不固定。 */
+  fixed?: TableColumnFixed
   width?: number
   disabled?: boolean
 }

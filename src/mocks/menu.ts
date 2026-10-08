@@ -33,7 +33,12 @@ export const mockMenus: MenuItem[] = [
         name: '数据查询',
         path: 'query',
         component: 'system/query/index',
-        meta: { title: '数据查询', icon: 'Search', permission: 'system:query:list' }
+        meta: {
+          title: '数据查询',
+          icon: 'Search',
+          permission: 'system:query:list',
+          keepAlive: true
+        }
       },
       {
         id: 'system-audit',

@@ -18,7 +18,11 @@ export interface UseTableColumnsOptions<TColumn extends ManagedTableColumn> {
 }
 
 function cloneColumns<TColumn extends ManagedTableColumn>(columns: readonly TColumn[]): TColumn[] {
-  return columns.map((column) => ({ ...column }))
+  return columns.map((column) => ({
+    ...column,
+    visible: column.visible ?? true,
+    fixed: column.fixed ?? ''
+  })) as TColumn[]
 }
 
 function mergeColumnDefinitions<TColumn extends ManagedTableColumn>(
@@ -32,8 +36,8 @@ function mergeColumnDefinitions<TColumn extends ManagedTableColumn>(
     if (!definition) return []
     return [{
       ...definition,
-      visible: current.visible,
-      fixed: current.fixed,
+      visible: current.visible ?? true,
+      fixed: current.fixed ?? '',
       ...(current.width === undefined ? {} : { width: current.width }),
       ...(current.minWidth === undefined ? {} : { minWidth: current.minWidth })
     } as TColumn]
@@ -50,11 +54,11 @@ export function useTableColumns<TColumn extends ManagedTableColumn>(options: Use
   const sourceColumns = computed(() => toValue(options.columns))
   const columnSettings = shallowRef<TColumn[]>(cloneColumns(sourceColumns.value))
   const orderedColumns = computed(() => [
-    ...columnSettings.value.filter((column) => column.fixed === 'left'),
-    ...columnSettings.value.filter((column) => column.fixed === ''),
-    ...columnSettings.value.filter((column) => column.fixed === 'right')
+    ...columnSettings.value.filter((column) => (column.fixed ?? '') === 'left'),
+    ...columnSettings.value.filter((column) => (column.fixed ?? '') === ''),
+    ...columnSettings.value.filter((column) => (column.fixed ?? '') === 'right')
   ])
-  const visibleColumns = computed(() => orderedColumns.value.filter((column) => column.visible))
+  const visibleColumns = computed(() => orderedColumns.value.filter((column) => column.visible !== false))
 
   watch(sourceColumns, (definitions) => {
     columnSettings.value = mergeColumnDefinitions(definitions, columnSettings.value)
@@ -64,7 +68,7 @@ export function useTableColumns<TColumn extends ManagedTableColumn>(options: Use
     const currentByKey = new Map(columnSettings.value.map((column) => [column.key, column]))
     columnSettings.value = settings.flatMap((setting) => {
       const current = currentByKey.get(setting.key)
-      return current ? [{ ...current, visible: setting.visible, fixed: setting.fixed }] : []
+      return current ? [{ ...current, visible: setting.visible ?? true, fixed: setting.fixed ?? '' }] : []
     })
   }
 
