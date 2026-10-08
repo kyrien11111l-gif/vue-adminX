@@ -1,5 +1,5 @@
 import type { QueryFilters, QueryResult } from '@/types'
-import { request } from '@/utils/http'
+import { request } from '@/services'
 
 export function queryData(
   filters: QueryFilters = {},

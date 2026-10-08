@@ -7,7 +7,7 @@ import {
 } from '@/config/router'
 import { registerDynamicRoutes } from '@/router/dynamic/registry'
 import { finishRouteProgress, startRouteProgress } from '@/router/progress'
-import { initializeSession } from '@/services/sessionInitialization'
+import { initializeSession } from '@/utils/sessionInitialization'
 import { useAuthStore, useLayoutStore, usePermissionStore } from '@/store'
 import { createLoginUrl, getSafeRedirectTarget } from '@/utils/navigation'
 import { hideStartupLoading, showStartupLoading } from '@/utils/startupLoading'

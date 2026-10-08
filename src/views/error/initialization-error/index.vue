@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { logoutToLogin } from '@/services/session'
+import { logoutToLogin } from '@/utils/session'
 import { usePermissionStore } from '@/store'
 
 const route = useRoute()

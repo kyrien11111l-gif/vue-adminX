@@ -1,8 +1,8 @@
 import { mockFetch } from '@/mocks'
-import { handleUnauthorizedOnce } from '@/services/unauthorized'
+import { handleUnauthorizedOnce } from '@/utils/unauthorized'
 import { useAuthStore } from '@/store'
 import type { ApiResponse } from '@/types'
-import type { RequestConfig, RequestParam, RequestParams } from '@/utils/http/types'
+import type { RequestConfig, RequestParam, RequestParams } from '@/services/types'
 
 const API_PROXY_URL = import.meta.env.VITE_API_PROXY_URL?.trim() ?? ''
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'

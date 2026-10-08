@@ -1,5 +1,5 @@
 import type { UserInfo } from '@/types'
-import { request } from '@/utils/http'
+import { request } from '@/services'
 
 export function getUserInfo(signal?: AbortSignal): Promise<UserInfo> {
   return request.get<UserInfo>('/user/info', { signal })

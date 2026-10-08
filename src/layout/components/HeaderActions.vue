@@ -47,7 +47,7 @@ import { ElMessageBox } from 'element-plus'
 import { useFullscreen } from '@/hooks/useFullscreen'
 import { useRouter } from 'vue-router'
 import { useLayoutStore, useUserStore } from '@/store'
-import { logoutToLogin } from '@/services/session'
+import { logoutToLogin } from '@/utils/session'
 import { transitionToTheme } from '@/utils/themeTransition'
 
 defineEmits<{ settings: [] }>()
