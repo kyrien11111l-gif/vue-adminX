@@ -4,7 +4,8 @@
 
 <script setup lang="ts">
 import { usePermissionStore } from '@/store'
+import type { PermissionValue } from '@/types'
 
-defineProps<{ permission: string }>()
+defineProps<{ permission: PermissionValue }>()
 const permissionStore = usePermissionStore()
 </script>

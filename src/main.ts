@@ -14,6 +14,7 @@ import { registerUnauthorizedHandler } from '@/utils/unauthorized'
 import { useLayoutStore } from '@/store'
 import { createLoginUrl } from '@/utils/navigation'
 import { hideStartupLoading, showStartupLoading } from '@/utils/startupLoading'
+import { permission } from '@/directives'
 
 const pinia = createPinia()
 const layoutStore = useLayoutStore(pinia)
@@ -23,6 +24,7 @@ const app = createApp(App)
 app.use(pinia)
 app.use(router)
 app.use(ElementPlus, { locale: zhCn })
+app.directive('permission', permission)
 
 registerUnauthorizedHandler(async () => {
   const redirect = router.currentRoute.value.fullPath

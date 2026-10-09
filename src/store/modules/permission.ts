@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
-import type { MenuItem, PermissionSnapshot } from '@/types'
+import type { MenuItem, PermissionSnapshot, PermissionValue } from '@/types'
 import { filterAccessibleMenus } from '@/utils/menu'
+import { hasPermission as checkPermission } from '@/utils/permission'
 
 interface PermissionState extends PermissionSnapshot {
   initialized: boolean
@@ -18,8 +19,8 @@ export const usePermissionStore = defineStore('permission', {
   getters: {
     accessibleMenus: (state): MenuItem[] =>
       filterAccessibleMenus(state.menus, state.permissions),
-    hasPermission: (state) => (permission?: string) =>
-      !permission || state.permissions.includes(permission)
+    hasPermission: (state) => (permission?: PermissionValue) =>
+      checkPermission(state.permissions, permission)
   },
   actions: {
     setData(snapshot: PermissionSnapshot) {

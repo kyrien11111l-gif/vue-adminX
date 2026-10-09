@@ -1,9 +1,9 @@
 <template>
   <div class="page-shell">
     <PageHeader title="用户管理" description="维护系统用户及其角色状态。">
-      <PermissionButton permission="system:user:create">
+      <Permission permission="system:user:create">
         <el-button type="primary" :icon="Plus" @click="demo('新增用户')">新增用户</el-button>
-      </PermissionButton>
+      </Permission>
     </PageHeader>
 
     <el-card shadow="never" class="mb-4">
@@ -47,7 +47,7 @@ import { computed, ref } from 'vue'
 import { Plus, Refresh } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import PageHeader from '@/components/PageHeader.vue'
-import PermissionButton from '@/components/PermissionButton.vue'
+import { Permission } from '@/components/permission'
 import { QueryForm } from '@/components/query-form'
 import type { QueryFormField, QueryFormModel } from '@/components/query-form'
 
