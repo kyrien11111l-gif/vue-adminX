@@ -32,7 +32,7 @@
             v-on="getFieldListeners(field)"
           >
             <el-option
-              v-for="option in field.type === 'select' ? getOptions(field) : []"
+              v-for="option in field.type === 'select' ? field.options ?? [] : []"
               :key="String(option.value)"
               :label="option.label"
               :value="option.value"
@@ -40,13 +40,6 @@
             />
           </component>
 
-          <div
-            v-if="field.type === 'select' && optionStates[field.prop]?.error"
-            class="mt-1 text-xs text-[var(--el-color-danger)]"
-            role="alert"
-          >
-            {{ optionStates[field.prop]?.error }}，再次展开可重试
-          </div>
         </el-form-item>
       </el-col>
 
@@ -91,18 +84,8 @@ import type {
   QueryFormField,
   QueryFormModel,
   QueryFormProps,
-  QueryOption,
-  QueryFormValue,
-  SelectQueryField
+  QueryFormValue
 } from './types'
-
-interface OptionState {
-  loading: boolean
-  loaded: boolean
-  options: QueryOption[]
-  error: string
-  pending?: Promise<void>
-}
 
 const props = withDefaults(defineProps<QueryFormProps>(), {
   initialValues: () => ({}),
@@ -123,13 +106,11 @@ const emit = defineEmits<{
   submit: [value: QueryFormModel]
   reset: [value: QueryFormModel]
   'values-change': [value: QueryFormModel]
-  'options-error': [payload: { field: SelectQueryField; error: Error }]
 }>()
 
 const formRef = ref<FormInstance>()
 const formModel = reactive<QueryFormModel>({ ...props.modelValue })
 const isExpanded = ref(props.defaultExpanded)
-const optionStates = reactive<Record<string, OptionState>>({})
 
 const visibleFields = computed(() =>
   isExpanded.value ? props.fields : props.fields.slice(0, props.collapsedCount)
@@ -142,7 +123,8 @@ const fieldComponents = {
   input: ElInput,
   select: ElSelect,
   date: ElDatePicker,
-  dateRange: ElDatePicker
+  dateRange: ElDatePicker,
+  dateTimeRange: ElDatePicker
 } satisfies Record<Exclude<QueryFormField['type'], 'custom'>, Component>
 
 function getFieldComponent(
@@ -194,28 +176,8 @@ watch(
   { deep: true }
 )
 
-function getOptions(field: SelectQueryField): QueryOption[] {
-  return optionStates[field.prop]?.options ?? field.options ?? []
-}
-
 function getFieldProps(field: Exclude<QueryFormField, { type: 'custom' }>) {
   const shared = { clearable: true, ...field.props }
-  if (field.type === 'select') {
-    return { ...shared, loading: optionStates[field.prop]?.loading ?? field.props?.loading }
-  }
-  if (field.type === 'date') {
-    return { type: 'date', valueFormat: 'YYYY-MM-DD', ...shared }
-  }
-  if (field.type === 'dateRange') {
-    return {
-      type: 'daterange',
-      valueFormat: 'YYYY-MM-DD',
-      rangeSeparator: '至',
-      startPlaceholder: '开始日期',
-      endPlaceholder: '结束日期',
-      ...shared
-    }
-  }
   return shared
 }
 
@@ -233,44 +195,7 @@ function getFieldListeners(field: Exclude<QueryFormField, { type: 'custom' }>) {
       }
     }
   }
-  if (field.type === 'select') {
-    return {
-      'update:modelValue': updateModelValue,
-      visibleChange: (visible: boolean) => void onSelectVisible(field, visible)
-    }
-  }
   return { 'update:modelValue': updateModelValue }
-}
-
-async function onSelectVisible(field: SelectQueryField, visible: boolean) {
-  if (!visible || !field.loadOptions) return
-  const state = (optionStates[field.prop] ??= {
-    loading: false,
-    loaded: false,
-    options: field.options ?? [],
-    error: ''
-  })
-  if (state.loaded) return
-  if (state.pending) return state.pending
-
-  state.loading = true
-  state.error = ''
-  state.pending = field
-    .loadOptions()
-    .then((options) => {
-      state.options = options
-      state.loaded = true
-    })
-    .catch((cause: unknown) => {
-      const error = cause instanceof Error ? cause : new Error('选项加载失败')
-      state.error = error.message
-      emit('options-error', { field, error })
-    })
-    .finally(() => {
-      state.loading = false
-      state.pending = undefined
-    })
-  return state.pending
 }
 
 function toggleExpanded() {

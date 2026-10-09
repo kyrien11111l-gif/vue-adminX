@@ -32,7 +32,6 @@ export interface InputQueryField extends QueryFieldBase {
 export interface SelectQueryField extends QueryFieldBase {
   type: 'select'
   options?: QueryOption[]
-  loadOptions?: () => Promise<QueryOption[]>
   props?: Partial<SelectProps>
 }
 
@@ -46,6 +45,11 @@ export interface DateRangeQueryField extends QueryFieldBase {
   props?: Partial<DatePickerProps>
 }
 
+export interface DateTimeRangeQueryField extends QueryFieldBase {
+  type: 'dateTimeRange'
+  props?: Partial<DatePickerProps>
+}
+
 export interface CustomQueryField extends QueryFieldBase {
   type: 'custom'
   slotName: string
@@ -56,6 +60,7 @@ export type QueryFormField =
   | SelectQueryField
   | DateQueryField
   | DateRangeQueryField
+  | DateTimeRangeQueryField
   | CustomQueryField
 
 export interface QueryFormProps {

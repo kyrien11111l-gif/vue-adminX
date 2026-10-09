@@ -1,8 +1,5 @@
 <template>
   <div class="page-shell">
-    <PageHeader title="工作台" :description="`欢迎回来，${userStore.displayName}`">
-      <el-button type="primary" :icon="Search" @click="router.push('/system/query')">数据查询</el-button>
-    </PageHeader>
 
     <el-row :gutter="16">
       <el-col v-for="item in stats" :key="item.label" :xs="24" :sm="12" :xl="6" class="mb-4">
@@ -44,7 +41,6 @@
 <script setup lang="ts">
 import { DataAnalysis, DocumentChecked, Search, UserFilled, WarningFilled } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
-import PageHeader from '@/components/PageHeader.vue'
 import { useUserStore } from '@/store'
 
 const router = useRouter()

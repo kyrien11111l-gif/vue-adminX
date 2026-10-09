@@ -1,6 +1,5 @@
 <template>
   <div class="page-shell">
-    <PageHeader title="角色管理" description="查看角色覆盖范围与权限配置。"><el-button type="primary" :icon="Plus" @click="demo('新增角色')">新增角色</el-button></PageHeader>
     <el-row :gutter="16" class="mb-4">
       <el-col v-for="stat in stats" :key="stat.label" :xs="24" :sm="8" class="mb-3 sm:mb-0">
         <el-card shadow="never"><p class="m-0 text-sm text-[var(--el-text-color-secondary)]">{{ stat.label }}</p><p class="mb-0 mt-2 text-3xl font-semibold">{{ stat.value }}</p></el-card>
@@ -21,9 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import PageHeader from '@/components/PageHeader.vue'
 
 const stats = [{ label: '角色总数', value: 5 }, { label: '已启用', value: 4 }, { label: '覆盖用户', value: 856 }]
 const roles = [

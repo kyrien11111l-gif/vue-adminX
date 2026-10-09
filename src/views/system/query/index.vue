@@ -10,7 +10,6 @@
           :collapsed-count="4"
           @submit="submitQuery"
           @reset="resetQuery"
-          @options-error="onOptionsError"
         >
           <template #field-priority="{ model }">
             <el-segmented v-model="model.priority" :options="priorityOptions" />
@@ -97,7 +96,7 @@ import { CommonTable } from '@/components/common-table'
 import type { CommonTableColumn } from '@/components/common-table'
 import { PageContainer } from '@/components/page-container'
 import { QueryForm } from '@/components/query-form'
-import type { QueryFormField, QueryFormModel } from '@/components/query-form'
+import type { QueryFormField, QueryFormModel, QueryOption } from '@/components/query-form'
 import { TableToolbar } from '@/components/table-toolbar'
 import type { TableColumnSetting } from '@/components/table-toolbar'
 import { useTableSettings } from '@/hooks/useTableSettings'
@@ -129,24 +128,30 @@ const detailOpen = ref(false)
 const activeRow = ref<QueryRow>()
 let controller: AbortController | undefined
 
-const fields: QueryFormField[] = [
+const categoryLabels = { 'data-sync': '数据同步', report: '报表导出', 'access-review': '权限复核' }
+const categoryOptions = ref<QueryOption[]>([])
+const categoryLoading = ref(true)
+const fields = computed<QueryFormField[]>(() => [
   { type: 'input', prop: 'keyword', label: '关键词', props: { placeholder: '工单号、标题、申请人' } },
-  { type: 'select', prop: 'category', label: '业务类型', props: { placeholder: '全部类型' }, loadOptions: async () => {
-    await new Promise((resolve) => window.setTimeout(resolve, 250))
-    return Object.entries(categoryLabels).map(([value, label]) => ({ value, label }))
-  } },
+  {
+    type: 'select',
+    prop: 'category',
+    label: '业务类型',
+    props: { placeholder: '全部类型', loading: categoryLoading.value },
+    options: categoryOptions.value
+  },
   { type: 'select', prop: 'status', label: '处理状态', props: { placeholder: '全部状态' }, options: [
     { value: 'pending', label: '待处理' }, { value: 'processing', label: '处理中' },
     { value: 'completed', label: '已完成' }, { value: 'failed', label: '失败' }
   ] },
-  { type: 'dateRange', prop: 'dateRange', label: '更新时间', props: { unlinkPanels: true } },
+  { type: 'dateTimeRange', prop: 'dateRange', label: '更新时间', props: { type: 'datetimerange' }, colProps: {xl:5} },
   { type: 'input', prop: 'department', label: '所属部门', props: { placeholder: '输入部门' } },
   { type: 'input', prop: 'processor', label: '处理人', props: { placeholder: '输入处理人' } },
   { type: 'custom', prop: 'priority', label: '优先级', slotName: 'priority' }
-]
+])
 const priorityOptions = [{ label: '全部', value: 'all' }, { label: '高', value: 'high' }, { label: '中', value: 'medium' }, { label: '低', value: 'low' }]
 const defaultColumns: ColumnSetting[] = [
-  { key: 'orderNo', prop: 'orderNo', label: '工单号', minWidth: 150, disabled: true, fixed: 'left', headerSlot: 'filter-header' },
+  { key: 'orderNo', prop: 'orderNo', label: '工单号', minWidth: 150, fixed: 'left', headerSlot: 'filter-header' },
   { key: 'title', prop: 'title', label: '任务标题', minWidth: 190, headerSlot: 'filter-header' },
   { key: 'requestId', prop: 'requestId', label: '请求 ID', minWidth: 220, headerSlot: 'filter-header', showOverflowTooltip: true },
   { key: 'category', prop: 'category', label: '类型', minWidth: 120, slot: 'category' },
@@ -181,8 +186,6 @@ const statusMeta: Record<QueryStatus, { label: string; type: TagType }> = {
 const priorityMeta: Record<QueryPriority, { label: string; type: TagType }> = {
   high: { label: '高', type: 'danger' }, medium: { label: '中', type: 'warning' }, low: { label: '低', type: 'info' }
 }
-const categoryLabels = { 'data-sync': '数据同步', report: '报表导出', 'access-review': '权限复核' }
-
 function valuesToFilters(): QueryFilters {
   const range = Array.isArray(submittedValues.value.dateRange) ? submittedValues.value.dateRange : []
   const text = (key: string) => String(submittedValues.value[key] ?? '').trim() || undefined
@@ -226,11 +229,20 @@ function priorityType(value: unknown): TagType { return priorityMeta[value as Qu
 function priorityLabel(value: unknown): string { return priorityMeta[value as QueryPriority]?.label ?? String(value) }
 function categoryLabel(value: unknown): string { return categoryLabels[value as keyof typeof categoryLabels] ?? String(value) }
 function showDetail(row: QueryRow) { activeRow.value = row; detailOpen.value = true }
-function onOptionsError() { ElMessage.warning('异步选项加载失败，可再次展开重试') }
 
-
+async function loadCategoryOptions() {
+  categoryLoading.value = true
+  try {
+    // 演示异步选项加载；接入真实后端时替换为已有 API 调用。
+    await new Promise((resolve) => window.setTimeout(resolve, 250))
+    categoryOptions.value = Object.entries(categoryLabels).map(([value, label]) => ({ value, label }))
+  } finally {
+    categoryLoading.value = false
+  }
+}
 
 onMounted(() => {
+  void loadCategoryOptions()
   void loadData()
 })
 onBeforeUnmount(() => controller?.abort())

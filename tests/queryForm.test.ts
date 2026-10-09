@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
-import ElementPlus from 'element-plus'
+import ElementPlus, { ElDatePicker, ElSelect } from 'element-plus'
 import QueryForm from '@/components/query-form/QueryForm.vue'
 
 describe('QueryForm', () => {
@@ -55,5 +55,41 @@ describe('QueryForm', () => {
     expect(wrapper.findAll('.query-form__item')).toHaveLength(4)
     expect(wrapper.emitted('expanded-change')?.at(-1)).toEqual([true])
     expect(wrapper.emitted('update:expanded')).toBeUndefined()
+  })
+
+  it('passes select options and loading state to Element Plus', () => {
+    const wrapper = mount(QueryForm, {
+      props: {
+        modelValue: { category: '' },
+        fields: [{
+          type: 'select',
+          prop: 'category',
+          label: '业务类型',
+          options: [{ label: '报表导出', value: 'report' }],
+          props: { loading: true }
+        }]
+      },
+      global: { plugins: [ElementPlus] }
+    })
+
+    const select = wrapper.findComponent(ElSelect)
+    expect(select.props('loading')).toBe(true)
+    expect(select.findAllComponents({ name: 'ElOption' })).toHaveLength(1)
+  })
+
+  it('supports datetime range fields', () => {
+    const wrapper = mount(QueryForm, {
+      props: {
+        modelValue: { updatedAt: [] },
+        fields: [{ type: 'dateTimeRange', prop: 'updatedAt', label: '更新时间' }]
+      },
+      global: { plugins: [ElementPlus] }
+    })
+
+    const datePicker = wrapper.findComponent(ElDatePicker)
+    expect(datePicker.props('type')).toBe('datetimerange')
+    expect(datePicker.props('valueFormat')).toBe('YYYY-MM-DD HH:mm:ss')
+    expect(datePicker.props('startPlaceholder')).toBe('开始时间')
+    expect(datePicker.props('endPlaceholder')).toBe('结束时间')
   })
 })
