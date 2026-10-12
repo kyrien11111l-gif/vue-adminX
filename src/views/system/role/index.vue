@@ -1,5 +1,5 @@
 <template>
-  <div class="page-shell">
+  <PageContainer>
     <el-row :gutter="16" class="mb-4">
       <el-col v-for="stat in stats" :key="stat.label" :xs="24" :sm="8" class="mb-3 sm:mb-0">
         <el-card shadow="never"><p class="m-0 text-sm text-[var(--el-text-color-secondary)]">{{ stat.label }}</p><p class="mb-0 mt-2 text-3xl font-semibold">{{ stat.value }}</p></el-card>
@@ -16,11 +16,12 @@
         <el-table-column label="操作" fixed="right" width="160"><template #default><el-button link type="primary" @click="demo('配置权限')">配置权限</el-button><el-button link @click="demo('编辑角色')">编辑</el-button></template></el-table-column>
       </el-table>
     </el-card>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
+import { PageContainer } from '@/components/page-container'
 
 const stats = [{ label: '角色总数', value: 5 }, { label: '已启用', value: 4 }, { label: '覆盖用户', value: 856 }]
 const roles = [

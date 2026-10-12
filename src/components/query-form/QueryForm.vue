@@ -12,7 +12,7 @@
         :key="field.prop"
         :xs="24"
         :sm="12"
-        :xl="4"
+        :xl="5"
         v-bind="field.colProps"
       >
         <el-form-item class="query-form__item" :label="field.label" :prop="field.prop" v-bind="field.formItemProps">
@@ -47,7 +47,7 @@
         class="query-form__actions"
         :xs="24"
         :sm="12"
-        :xl="6"
+        :xl="4"
         v-bind="actionColProps"
       >
         <div class="flex h-full items-center justify-end gap-2 whitespace-nowrap">

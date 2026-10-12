@@ -1,7 +1,7 @@
 <template>
-  <div class="page-shell">
+  <PageContainer>
 
-    <el-card shadow="never" class="mb-4">
+    <el-card class="mb-4">
       <QueryForm
         v-model="filters"
         :fields="filterFields"
@@ -12,7 +12,7 @@
       />
     </el-card>
 
-    <el-card shadow="never" body-class="!p-0">
+    <el-card body-class="!p-0">
       <div class="flex items-center justify-between border-b border-b-[var(--el-border-color-light)] px-4 py-3">
         <span class="font-medium">用户列表</span>
         <el-button :icon="Refresh" text @click="demo('刷新')">刷新</el-button>
@@ -34,7 +34,7 @@
         <el-pagination v-model:current-page="pageCurrent" :page-size="5" layout="total, prev, pager, next" :total="filteredRows.length" />
       </div>
     </el-card>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">
@@ -43,6 +43,7 @@ import { Refresh } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { QueryForm } from '@/components/query-form'
 import type { QueryFormField, QueryFormModel } from '@/components/query-form'
+import { PageContainer } from '@/components/page-container'
 
 interface UserRow {
   id: number

@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container" :style="containerStyle">
+  <div class="box-border flex min-w-0 flex-col p-4" :style="containerStyle">
     <slot />
   </div>
 </template>
@@ -35,12 +35,3 @@ const containerStyle = computed<CSSProperties>(() => ({
   minHeight: toCssSize(props.minHeight)
 }))
 </script>
-
-<style scoped>
-.page-container {
-  box-sizing: border-box;
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-}
-</style>

@@ -1,5 +1,5 @@
 <template>
-  <PageContainer class="p-4">
+  <PageContainer>
     <div class="flex min-h-0 flex-1 flex-col">
       <el-card class="mb-4 shrink-0">
         <QueryForm

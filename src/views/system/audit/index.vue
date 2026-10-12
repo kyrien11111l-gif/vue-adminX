@@ -1,6 +1,6 @@
 <template>
-  <div class="page-shell">
-    <el-card shadow="never" body-class="!p-0">
+  <PageContainer>
+    <el-card body-class="!p-0">
       <el-table :data="records" row-key="id" stripe>
         <el-table-column prop="time" label="时间" min-width="170" />
         <el-table-column prop="operator" label="操作人" min-width="120" />
@@ -10,10 +10,11 @@
         <el-table-column label="结果" width="100"><template #default="{ row }"><el-tag :type="row.success ? 'success' : 'danger'">{{ row.success ? '成功' : '失败' }}</el-tag></template></el-table-column>
       </el-table>
     </el-card>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">
+import { PageContainer } from '@/components/page-container'
 const records = [
   { id: 1, time: '2026-09-29 10:42:16', operator: 'auditor', action: '导出查询结果', target: '华东区域销售数据同步', ip: '10.18.4.21', success: true },
   { id: 2, time: '2026-09-29 10:18:33', operator: 'admin', action: '调整用户权限', target: '用户 wangxiaomin', ip: '10.18.1.8', success: true },
