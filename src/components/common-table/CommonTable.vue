@@ -37,7 +37,7 @@
       </el-table>
     </div>
 
-    <div v-if="paginationConfig" class="common-table__pagination shrink-0">
+    <div v-if="paginationConfig" class="flex justify-end p-4 shrink-0">
       <el-scrollbar>
         <slot name="pagination" :current-page="currentPage" :page-size="pageSize">
           <el-pagination
@@ -252,12 +252,6 @@ defineExpose({
   min-height: 0;
   flex: 1;
   overflow: hidden;
-}
-
-.common-table__pagination {
-  display: flex;
-  justify-content: flex-end;
-  padding: 16px;
 }
 
 .common-table :deep(.el-table th.el-table__cell),
