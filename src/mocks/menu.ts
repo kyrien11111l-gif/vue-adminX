@@ -41,6 +41,18 @@ export const mockMenus: MenuItem[] = [
         }
       },
       {
+        id: 'system-fulfillment-report',
+        name: '履约时效报表',
+        path: 'fulfillment-report',
+        component: 'system/fulfillment-report/index',
+        meta: {
+          title: '履约时效报表',
+          icon: 'DataAnalysis',
+          permission: 'system:fulfillment:list',
+          keepAlive: true
+        }
+      },
+      {
         id: 'system-audit',
         name: '审计记录',
         path: 'audit',

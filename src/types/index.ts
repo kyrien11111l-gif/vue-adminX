@@ -1,4 +1,5 @@
 export * from '@/types/api'
+export * from '@/types/fulfillmentReport'
 export * from '@/types/layout'
 export * from '@/types/menu'
 export * from '@/types/permission'

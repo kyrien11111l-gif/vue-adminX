@@ -1,7 +1,9 @@
 import { mockMenus } from '@/mocks/menu'
+import { fulfillmentRowsByFilters } from '@/mocks/fulfillmentReport'
 import { queryRowsByFilters } from '@/mocks/queryData'
 import type {
   ApiResponse,
+  FulfillmentReportFilters,
   LoginCredentials,
   LoginResult,
   QueryFilters,
@@ -25,6 +27,7 @@ const profiles: Record<string, MockProfile> = {
       'system:user:create',
       'system:role:list',
       'system:query:list',
+      'system:fulfillment:list',
       'system:audit:list',
       'system:not-match:view'
     ]
@@ -33,7 +36,7 @@ const profiles: Record<string, MockProfile> = {
     token: 'mock-token-auditor',
     password: '123456',
     user: { id: 2, username: 'auditor', nickname: '审计专员', roles: ['auditor'] },
-    permissions: ['system:query:list', 'system:audit:list']
+    permissions: ['system:query:list', 'system:fulfillment:list', 'system:audit:list']
   }
 }
 
@@ -117,6 +120,9 @@ export async function mockFetch(
   if (path === '/permissions' && method === 'GET') return success(profile.permissions)
   if (path === '/query' && method === 'POST') {
     return success(queryRowsByFilters(parseBody<QueryFilters>(init?.body) ?? {}))
+  }
+  if (path === '/fulfillment-report' && method === 'POST') {
+    return success(fulfillmentRowsByFilters(parseBody<FulfillmentReportFilters>(init?.body) ?? {}))
   }
 
   return json<ApiResponse<null>>(

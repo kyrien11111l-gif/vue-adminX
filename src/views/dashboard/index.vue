@@ -39,12 +39,8 @@
 </template>
 
 <script setup lang="ts">
-import { DataAnalysis, DocumentChecked, Search, UserFilled, WarningFilled } from '@element-plus/icons-vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/store'
+import { DataAnalysis, DocumentChecked, UserFilled, WarningFilled } from '@element-plus/icons-vue'
 
-const router = useRouter()
-const userStore = useUserStore()
 const stats = [
   { label: '今日请求', value: '1,286', note: '较昨日 +12.5%', color: '#409eff', icon: DataAnalysis },
   { label: '待处理', value: '23', note: '其中高优先级 5 条', color: '#e6a23c', icon: WarningFilled },
