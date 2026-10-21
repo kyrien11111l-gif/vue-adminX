@@ -1,11 +1,13 @@
 import { mockMenus } from '@/mocks/menu'
 import { fulfillmentRowsByFilters } from '@/mocks/fulfillmentReport'
+import { orderRowsByFilters } from '@/mocks/orders'
 import { queryRowsByFilters } from '@/mocks/queryData'
 import type {
   ApiResponse,
   FulfillmentReportFilters,
   LoginCredentials,
   LoginResult,
+  OrderFilters,
   QueryFilters,
   UserInfo
 } from '@/types'
@@ -28,6 +30,7 @@ const profiles: Record<string, MockProfile> = {
       'system:role:list',
       'system:query:list',
       'system:fulfillment:list',
+      'system:order:list',
       'system:audit:list',
       'system:not-match:view'
     ]
@@ -36,7 +39,7 @@ const profiles: Record<string, MockProfile> = {
     token: 'mock-token-auditor',
     password: '123456',
     user: { id: 2, username: 'auditor', nickname: '审计专员', roles: ['auditor'] },
-    permissions: ['system:query:list', 'system:fulfillment:list', 'system:audit:list']
+    permissions: ['system:query:list', 'system:fulfillment:list', 'system:order:list', 'system:audit:list']
   }
 }
 
@@ -123,6 +126,9 @@ export async function mockFetch(
   }
   if (path === '/fulfillment-report' && method === 'POST') {
     return success(fulfillmentRowsByFilters(parseBody<FulfillmentReportFilters>(init?.body) ?? {}))
+  }
+  if (path === '/orders' && method === 'POST') {
+    return success(orderRowsByFilters(parseBody<OrderFilters>(init?.body) ?? {}))
   }
 
   return json<ApiResponse<null>>(

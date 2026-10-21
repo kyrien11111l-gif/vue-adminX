@@ -1,5 +1,6 @@
 export * from '@/api/auth'
 export * from '@/api/fulfillmentReport'
 export * from '@/api/menu'
+export * from '@/api/orders'
 export * from '@/api/query'
 export * from '@/api/user'

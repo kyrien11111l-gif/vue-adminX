@@ -17,4 +17,12 @@ describe('dynamic route generation', () => {
     expect(reportRoute?.meta?.permission).toBe('system:fulfillment:list')
     expect(reportRoute?.meta?.title).toBe('履约时效报表')
   })
+
+  it('generates the orders route from the mock menu', () => {
+    const { defaultRoutes } = generateRoutes(mockMenus)
+    const ordersRoute = defaultRoutes.find((route) => route.path === '/system/orders')
+
+    expect(ordersRoute?.meta?.permission).toBe('system:order:list')
+    expect(ordersRoute?.meta?.title).toBe('订单管理')
+  })
 })

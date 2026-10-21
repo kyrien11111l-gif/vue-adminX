@@ -29,6 +29,18 @@ export const mockMenus: MenuItem[] = [
         meta: { title: '角色管理', icon: 'Lock', permission: 'system:role:list' }
       },
       {
+        id: 'system-orders',
+        name: '订单管理',
+        path: 'orders',
+        component: 'system/orders/index',
+        meta: {
+          title: '订单管理',
+          icon: 'Tickets',
+          permission: 'system:order:list',
+          keepAlive: true
+        }
+      },
+      {
         id: 'system-query',
         name: '数据查询',
         path: 'query',
