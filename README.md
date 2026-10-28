@@ -1,117 +1,135 @@
 # AdminX
 
-AdminX 是从只读 React 项目 `E:\work\admin` 迁移出的独立 Vue 3 后台管理演示项目。页面行为、接口契约与权限语义沿用原项目，目录职责参考 pure-admin-thin；所有新代码只写入当前目录。
+AdminX 是一个基于 Vue 3 的后台管理项目，使用 TypeScript 和 Vite 构建。项目提供登录与会话恢复、动态菜单、路由权限、响应式布局、主题设置，以及订单、数据查询和履约报表等管理页面。
 
-## 运行环境与版本
+项目默认使用仓库内置 Mock 数据，安装依赖后即可启动。需要接入真实服务时，可通过环境变量关闭 Mock，并沿用现有请求层和接口类型。
 
-- Node.js 22.22.2
-- pnpm 10.33.2
-- Vue 3.5.43、Vue Router 5.3.1、Pinia 4.0.3
-- Element Plus 2.14.6、`@element-plus/icons-vue` 2.3.2
-- Vite 8.3.1、TypeScript 6.0.3、Vue TSC 3.3.11
-- Tailwind CSS 4.3.3、Sass 1.105.0、NProgress 0.2.0
-- ESLint 10.11.0、Vitest 5.0.2、Vue Test Utils 2.5.1、happy-dom 20.14.5
+## 技术栈
 
-版本被精确锁定在 `package.json` 和 `pnpm-lock.yaml` 中。
+- Vue 3、TypeScript、Vite
+- Vue Router、Pinia
+- Element Plus、`@element-plus/icons-vue`
+- Tailwind CSS、Sass、NProgress
+- Vitest、Vue Test Utils、happy-dom
+
+## 快速开始
+
+运行环境要求：Node.js `>=22.12.0`，pnpm `>=10`。
 
 ```bash
 pnpm install
 pnpm dev
+```
+
+常用命令：
+
+```bash
+pnpm typecheck  # TypeScript 与 Vue 类型检查
+pnpm lint       # ESLint 检查，禁止 warning 和 error
+pnpm test       # 运行 Vitest 测试
+pnpm build      # 类型检查后执行生产构建
+pnpm preview    # 预览生产构建
+```
+
+## Mock 账号
+
+开发环境默认启用 Mock，可以使用以下账号登录：
+
+| 账号 | 密码 | 可访问范围 |
+| --- | --- | --- |
+| `admin` | `123456` | 全部菜单、用户新增按钮和权限验证页面 |
+| `auditor` | `123456` | 工作台、订单、数据查询、履约报表和审计记录；用户与角色页面无权限 |
+
+## 环境变量
+
+环境变量位于 `.env.development` 和 `.env.production`：
+
+| 变量 | 说明 | 示例 |
+| --- | --- | --- |
+| `VITE_USE_MOCK` | 是否使用内置 Mock 请求 | `true` |
+| `VITE_API_PROXY_URL` | API 请求前缀 | `/api` |
+| `VITE_WATERMARK_ENABLED` | 是否显示页面水印 | `true` |
+| `VITE_WATERMARK_CONTENT` | 水印内容 | `AdminX` |
+
+切换真实接口时，将对应环境中的 `VITE_USE_MOCK` 设置为 `false`，并让 `VITE_API_PROXY_URL` 指向可用的 API 前缀。请求统一通过 `src/services/request.ts` 发出，默认携带 Bearer token，并处理超时、取消、统一响应和 401。
+
+接口响应使用以下结构：
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {}
+}
+```
+
+## 主要功能
+
+- 登录、Token 会话恢复、退出登录和 401 统一处理。
+- 动态菜单与动态路由，根据权限过滤菜单和页面访问范围。
+- 403、404、初始化失败和动态页面组件缺失等错误页面。
+- 侧边、顶部、双列和混合四种导航布局，支持移动端导航抽屉。
+- 面包屑、页面 Tabs、布局设置、水印、浏览器全屏和内容最大化。
+- 浅色、暗黑、跟随系统和主题色切换，并持久化布局设置。
+- 工作台、用户管理、角色管理、订单管理、数据查询、履约时效报表和审计记录。
+- 内嵌白名单页面、全屏页面、外部链接菜单和多层级菜单。
+- 可复用的 `QueryForm`、`CommonTable`、`TableToolbar`、`PageContainer` 和权限组件。
+- 数据查询支持组合筛选、分页、行选择、表格密度、列显隐、列排序、列固定、列宽调整、详情查看和 CSV 导出。
+
+## 路由与权限语义
+
+- `/login` 和 `/whiteList` 是无需登录的白名单路由。
+- 已注册但当前角色无权限的地址进入 `/403`。
+- 动态菜单已注册但找不到页面组件时进入 `notMatch` 页面。
+- 不存在于静态路由和动态菜单中的地址进入 `/404`。
+- 刷新或直接访问动态地址时，用户、菜单和权限会并发恢复，并在恢复完成后重新匹配原地址。
+- 退出登录或接口返回 401 时，会清理 Token、用户信息、权限、Tabs 和动态路由。
+- 登录回跳只接受站内绝对路径，拒绝外部地址、协议相对地址和递归登录地址。
+
+## 目录结构
+
+```text
+src/
+├── api/                  # 登录、用户、菜单、权限与业务查询接口
+├── components/           # CommonTable、QueryForm、TableToolbar 等通用组件
+├── config/               # 布局、路由和菜单图标配置
+├── directives/           # 权限指令
+├── hooks/                # 全屏、响应式布局、主题和表格设置 Hook
+├── layout/               # 页面壳、导航、Header、Tabs 和设置抽屉
+├── mocks/                # Mock 账号、菜单和业务数据
+├── router/               # 静态路由、动态路由和导航守卫
+├── services/             # 请求封装、超时、取消和响应处理
+├── store/                # Pinia stores
+├── styles/               # Tailwind 入口、全局 Sass 和主题样式
+├── types/                # API、菜单、权限、布局和业务类型
+├── utils/                # 会话、导航、菜单、主题和通用工具
+└── views/                # 登录、工作台、系统管理和错误页面
+tests/                    # Vitest 单元测试
+```
+
+## Mock 接口
+
+内置 Mock 当前覆盖以下接口：
+
+- `POST /login`
+- `GET /user/info`
+- `GET /menus`
+- `GET /permissions`
+- `POST /query`
+- `POST /orders`
+- `POST /fulfillment-report`
+
+用户、角色和审计页面中的部分新增、编辑、权限配置等操作目前仅展示界面反馈，尚未连接写入接口。接入后端时，请在 `src/api` 中补充对应接口，并同步更新类型、权限和 Mock 数据。
+
+## 开发与验证
+
+修改 Vue、TypeScript、路由、状态或权限相关代码后，建议执行：
+
+```bash
 pnpm typecheck
 pnpm lint
 pnpm test
 pnpm build
-pnpm preview
 ```
 
-## 演示账号
-
-| 账号 | 密码 | 权限 |
-|---|---|---|
-| `admin` | `123456` | 全部纳入页面、用户新增按钮、隐藏的 notMatch 验证路由 |
-| `auditor` | `123456` | 工作台、数据查询、审计直达页；用户和角色页面直达时进入 403 |
-
-默认使用内置 Mock。`.env.development` 中 `VITE_USE_MOCK=true`；切换真实后端时改为 `false`，并通过 `VITE_API_BASE_URL` 指定 API 前缀。请求契约集中在 `src/api`，统一响应为 `{ code, message, data }`。
-
-## 目录职责
-
-```text
-src/
-├── api/                       # 登录、会话、菜单、权限与查询接口
-├── components/query-form/     # el-row/el-col 驱动的跨页面查询表单
-├── config/                    # 布局常量、路由常量与菜单图标映射
-├── hooks/                     # 响应式、浏览器全屏、系统主题 Hook
-├── layout/
-│   ├── components/            # Header、菜单、Tabs、设置、移动导航等
-│   └── hooks/                 # 仅布局使用的导航状态 Hook
-├── mocks/                     # 两个账号、动态菜单与查询数据
-├── router/dynamic/            # 动态路由生成、注册与清理
-├── router/guards/             # 登录恢复、权限与错误语义守卫
-├── services/                  # 会话初始化、退出与 401 合并处理
-├── store/modules/             # Pinia Options Stores
-├── styles/                    # Tailwind 入口、Sass 全局样式与主题
-├── types/                     # API、菜单、权限、布局与查询类型
-├── utils/http/                # 请求、超时、取消、Bearer token、Mock 切换
-└── views/                     # 页面
-```
-
-页面表格直接使用 `el-table`、`el-table-column` 和 `el-pagination`。工程中没有通用表格组件，也没有 `useTable` 一类 Hook。
-
-## 功能对应关系
-
-| 原功能 | Vue 实现位置 | 当前验证方式 |
-|---|---|---|
-| 启动 Loading 与早期主题 | `src/main.ts`、`src/utils/startupLoading.ts`、`src/utils/theme.ts` | 首开和刷新可见；首个有效页面渲染后移除；单测覆盖 DOM 清理入口 |
-| 登录、会话恢复、401 与退出 | `views/login`、`services`、auth/user stores | admin、auditor 登录与退出回跳已在浏览器验证 |
-| 动态路由、菜单与访问权限 | `router/dynamic`、`router/guards`、permission store | auditor 菜单过滤、直达用户页 403、未知路由 404 已验证 |
-| 403 / 404 / notMatch | `views/error` | 路由语义分离；notMatch 由 `/system/missing` 隐藏动态菜单验证 |
-| 白名单与全屏路由 | `views/white-list`、`views/fullscreen` | 无壳路由独立实现，白名单不初始化会话 |
-| 四种导航与移动抽屉 | `src/layout` | 侧边、顶部、双列、混合切换已验证；375/768/1024 断点已验证 |
-| Header、面包屑、Tabs、设置、水印 | `layout/components`、tabs/layout stores | 页面切换、标签持久化、设置抽屉与水印交互已验证 |
-| 浅色、暗黑、跟随系统、主题色 | layout store、`useSystemTheme`、Element Plus dark variables | 暗黑与跟随系统的 `html.dark`、设置持久化已验证 |
-| 浏览器全屏与内容最大化 | `useFullscreen`、SettingsDrawer | 使用 Fullscreen API；Esc 通过 `fullscreenchange` 同步状态 |
-| queryForm | `components/query-form` | el-row/el-col、受控值、输入/选择/日期/范围/自定义字段、展开、重置、异步选项和事件；组件测试通过 |
-| 用户管理 | `views/system/user` | 单张直接表格、查询、每页 5 条、按钮权限与演示反馈 |
-| 角色管理 | `views/system/role` | 单组统计卡与直接表格，不分页 |
-| 审计记录 | `views/system/audit` | auditor 可直达，导出按钮提供待接入提示 |
-| 数据查询 | `views/system/query` | 组合与表头筛选、分页、选择、密度、列显隐/顺序/固定/宽度、详情、刷新与 CSV |
-| NProgress | `router/progress.ts`、全局守卫 | beforeEach 启动，afterEach/onError 结束并清理启动遮罩 |
-
-## queryForm 约定
-
-`QueryForm` 根布局使用 `el-row`，字段和操作区均使用 `el-col`，默认响应式列宽为 `xs=24`、`sm=12`、`xl=6`。字段联合类型包含 `input`、`select`、`date`、`dateRange`、`custom`；支持 `v-model`、初始值、受控展开、异步选项缓存和重复请求合并、字段级错误、查询/重置/值变化事件，以及自定义字段和额外操作插槽。
-
-## 权限与错误语义
-
-- `/login`、`/whiteList` 是白名单。
-- 已知路由但权限不足进入 403。
-- 动态菜单已注册但页面组件缺失进入 notMatch。
-- 不存在于菜单和静态路由的地址进入 404。
-- 刷新或直接输入动态 URL 时，会话信息、菜单与权限并发恢复并去重，然后重新匹配原地址。
-- 退出或 401 会清除会话、用户、权限、Tabs 和动态路由。
-- 登录回跳只接受站内绝对路径，拒绝协议相对地址、外部地址和递归登录地址。
-
-## 已执行的验证
-
-2026-09-29 在 Node.js 22.22.2 / pnpm 10.33.2 环境执行：
-
-- `pnpm typecheck`：通过。
-- `pnpm lint`：通过，0 warning / 0 error。
-- `pnpm test`：通过，5 个测试文件、8 个测试。
-- `pnpm build`：通过。
-- 浏览器：admin 登录、查询数据加载与关键词筛选、退出回跳；auditor 登录、菜单过滤、直达用户页进入 403、未知路由 404。
-- 浏览器：四种布局切换、暗黑/跟随系统/浅色切换、设置持久化、375/768/1024 响应式导航。
-- 浏览器：启动遮罩在刷新后正常清理；查询页提供 1000 条 Mock 数据，默认每页 20 条，可切换 20 / 50 / 100 / 200 条。
-
-## 纳入、排除与差异
-
-已纳入登录、工作台、用户、角色、审计、查询、全屏、白名单、403、404、notMatch，以及布局、主题、权限、菜单、Tabs、Mock、Loading 和路由进度。
-
-明确排除 `virtualQuery`、`tanstack`、`tableTest` 及其专属接口、Mock、组件、测试与依赖；未引入 React、Ant Design、Zustand、SimpleBar、TanStack Table 或虚拟表格依赖。
-
-仍存在的差异：
-
-- 当前业务数据来自 Mock；用户/角色/审计的写操作仅展示“演示功能/待接入”反馈，没有虚构本地 CRUD。
-- `index.html` 保持标准 Vite 入口，因此最早主题应用点是 `main.ts` 开始执行；没有在 HTML 解析阶段注入主题脚本。
-- 内嵌页面使用同源白名单页，避免第三方站点的 `frame-ancestors` / `X-Frame-Options` 导致演示不可用；外链能力通过独立的 Vue 官网菜单验证。
-- 生产构建仍提示 Element Plus 主包 chunk 超过 Vite 的默认 500 kB 建议值，不影响构建或运行；后续可按部署缓存策略进一步拆分 vendor chunk。
+新增页面或菜单时，请同步检查动态路由、菜单权限、Mock 数据、类型定义和对应测试。

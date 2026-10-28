@@ -9,77 +9,77 @@ importers:
   .:
     dependencies:
       '@element-plus/icons-vue':
-        specifier: 2.3.2
+        specifier: ^2.3.2
         version: 2.3.2(vue@3.5.43(typescript@6.0.3))
       element-plus:
-        specifier: 2.14.6
+        specifier: ^2.14.6
         version: 2.14.6(vue@3.5.43(typescript@6.0.3))
       nprogress:
-        specifier: 0.2.0
+        specifier: ^0.2.0
         version: 0.2.0
       pinia:
-        specifier: 4.0.3
+        specifier: ^4.0.3
         version: 4.0.3(@vue/devtools-api@8.2.1)(typescript@6.0.3)(vue@3.5.43(typescript@6.0.3))
       vue:
-        specifier: 3.5.43
+        specifier: ^3.5.43
         version: 3.5.43(typescript@6.0.3)
       vue-router:
-        specifier: 5.3.1
+        specifier: ^5.3.1
         version: 5.3.1(@vue/compiler-sfc@3.5.43)(pinia@4.0.3(@vue/devtools-api@8.2.1)(typescript@6.0.3)(vue@3.5.43(typescript@6.0.3)))(rolldown@1.2.11)(vite@8.3.1(@types/node@22.20.4)(jiti@2.7.0)(sass@1.105.0))(vue@3.5.43(typescript@6.0.3))
     devDependencies:
       '@eslint/js':
-        specifier: 10.0.1
+        specifier: ^10.0.1
         version: 10.0.1(eslint@10.11.0(jiti@2.7.0))
       '@tailwindcss/vite':
-        specifier: 4.3.3
+        specifier: ^4.3.3
         version: 4.3.3(vite@8.3.1(@types/node@22.20.4)(jiti@2.7.0)(sass@1.105.0))
       '@types/node':
-        specifier: 22.20.4
+        specifier: ^22.20.4
         version: 22.20.4
       '@types/nprogress':
-        specifier: 0.2.3
+        specifier: ^0.2.3
         version: 0.2.3
       '@vitejs/plugin-vue':
-        specifier: 6.0.9
+        specifier: ^6.0.9
         version: 6.0.9(vite@8.3.1(@types/node@22.20.4)(jiti@2.7.0)(sass@1.105.0))(vue@3.5.43(typescript@6.0.3))
       '@vue/test-utils':
-        specifier: 2.5.1
+        specifier: ^2.5.1
         version: 2.5.1(@vue/compiler-dom@3.5.43)(@vue/server-renderer@3.5.43)(vue@3.5.43(typescript@6.0.3))
       eslint:
-        specifier: 10.11.0
+        specifier: ^10.11.0
         version: 10.11.0(jiti@2.7.0)
       eslint-plugin-vue:
-        specifier: 10.11.1
+        specifier: ^10.11.1
         version: 10.11.1(@typescript-eslint/parser@8.71.0(eslint@10.11.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.11.0(jiti@2.7.0))(vue-eslint-parser@10.3.0(eslint@10.11.0(jiti@2.7.0)))
       globals:
-        specifier: 17.12.0
+        specifier: ^17.12.0
         version: 17.12.0
       happy-dom:
-        specifier: 20.14.5
+        specifier: ^20.14.5
         version: 20.14.5
       sass:
-        specifier: 1.105.0
+        specifier: ^1.105.0
         version: 1.105.0
       tailwindcss:
-        specifier: 4.3.3
+        specifier: ^4.3.3
         version: 4.3.3
       typescript:
-        specifier: 6.0.3
+        specifier: ^6.0.3
         version: 6.0.3
       typescript-eslint:
-        specifier: 8.71.0
+        specifier: ^8.71.0
         version: 8.71.0(eslint@10.11.0(jiti@2.7.0))(typescript@6.0.3)
       vite:
-        specifier: 8.3.1
+        specifier: ^8.3.1
         version: 8.3.1(@types/node@22.20.4)(jiti@2.7.0)(sass@1.105.0)
       vitest:
-        specifier: 5.0.2
+        specifier: ^5.0.2
         version: 5.0.2(@types/node@22.20.4)(happy-dom@20.14.5)(vite@8.3.1(@types/node@22.20.4)(jiti@2.7.0)(sass@1.105.0))
       vue-eslint-parser:
-        specifier: 10.3.0
+        specifier: ^10.3.0
         version: 10.3.0(eslint@10.11.0(jiti@2.7.0))
       vue-tsc:
-        specifier: 3.3.11
+        specifier: ^3.3.11
         version: 3.3.11(typescript@6.0.3)
 
 packages:
