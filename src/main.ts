@@ -1,8 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import ElementPlus, { ElMessage } from 'element-plus'
-import zhCn from 'element-plus/es/locale/lang/zh-cn'
-import 'element-plus/dist/index.css'
+import { ElMessage } from 'element-plus'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import 'nprogress/nprogress.css'
 import '@/styles/tailwind.css'
@@ -23,7 +21,6 @@ showStartupLoading(layoutStore.persistedState)
 const app = createApp(App)
 app.use(pinia)
 app.use(router)
-app.use(ElementPlus, { locale: zhCn })
 app.directive('permission', permission)
 
 registerUnauthorizedHandler(async () => {
