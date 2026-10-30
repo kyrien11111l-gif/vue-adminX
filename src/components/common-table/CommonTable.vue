@@ -254,6 +254,16 @@ defineExpose({
   overflow: hidden;
 }
 
+.common-table :deep(.el-table) {
+  --el-table-header-bg-color: var(--el-fill-color);
+  --el-table-border-color: var(--el-border-color);
+}
+
+html[data-theme='dark'] .common-table :deep(.el-table) {
+  --el-table-fixed-left-column: inset 8px 0 8px -5px var(--el-border-color-dark);
+  --el-table-fixed-right-column: inset -8px 0 8px -5px var(--el-border-color-dark);
+}
+
 .common-table :deep(.el-table th.el-table__cell),
 .common-table :deep(.el-table td.el-table__cell) {
   text-align: center;
