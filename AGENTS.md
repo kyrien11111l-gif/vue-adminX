@@ -1,89 +1,204 @@
-# AdminX Agent Guide
+# AdminX 项目开发指南
 
-## 项目概览
+> 本文件为 AI 编程助手和协作者提供项目上下文、编码规范、验证流程与安全边界。
 
-AdminX 是一个 Vue 3 后台管理演示项目，使用 TypeScript、Vite、Vue Router、Pinia、Element Plus、Tailwind CSS 和 Sass。项目默认使用内置 Mock 数据，接口契约和权限语义集中在当前仓库内维护。
+## 项目信息
 
-除非用户明确要求，不要修改仓库外的项目，也不要从旧的 React 项目复制实现。当前仓库是独立项目。
+- AdminX 是一个 Vue 3 后台管理演示项目，使用 TypeScript、Vite、Vue Router、Pinia、Element Plus、Tailwind CSS 和 Sass。
+- 项目默认使用仓库内的 Mock 数据；接口契约、权限语义和会话恢复逻辑以当前仓库实现为准。
+- 当前项目独立维护。除非用户明确要求，不要修改仓库外的项目，也不要直接复制其它项目的实现。
+- 运行环境要求 Node.js `>=22.12.0`、pnpm `>=10`。
+
+## 目录结构
+
+```text
+adminX/
+├── src/
+│   ├── api/                    # 登录、用户、菜单、权限与查询接口封装
+│   ├── components/             # 可复用 Vue 组件
+│   ├── config/                 # 布局、路由与菜单图标配置
+│   ├── directives/             # Vue 自定义指令，例如权限指令
+│   ├── hooks/                  # 通用响应式 Hook
+│   ├── layout/                 # 页面壳、导航、Header、Tabs、设置抽屉
+│   ├── mocks/                  # Mock 请求和演示账号数据
+│   ├── router/                 # 静态路由、动态路由和导航守卫
+│   ├── services/               # HTTP 请求层和请求类型
+│   ├── store/                  # Pinia stores
+│   ├── styles/                 # Tailwind 与全局 Sass 样式
+│   ├── types/                  # API、菜单、权限、布局和查询类型
+│   ├── utils/                  # 会话、主题、导航和通用工具
+│   └── views/                  # 页面级 Vue 组件
+├── tests/                      # Vitest、Vue Test Utils 和 happy-dom 测试
+├── design-system/              # 设计系统资源；未经明确要求不要修改
+├── package.json                # 脚本、依赖和运行时版本要求
+└── vite.config.ts              # Vite、Tailwind 与测试相关配置
+```
+
+### 请求层
+
+- `src/services/index.ts`：请求层公共导出。
+- `src/services/request.ts`：请求、超时、取消、Bearer token、Mock 切换和统一响应处理。
+- `src/services/types.ts`：请求配置和参数类型。
+- API 模块从 `@/services` 导入 `request`；不要重新实现请求、超时或 token 逻辑。
+
+### 会话与主题
+
+- `src/utils/session.ts`：清理会话和退出登录。
+- `src/utils/sessionInitialization.ts`：并发恢复用户、菜单和权限。
+- `src/utils/unauthorized.ts`：合并重复的 401 处理。
+- `src/utils/theme.ts`：主题状态解析和应用。
+- `src/utils/themeTransition.ts`：主题切换过渡动画。
 
 ## 常用命令
-
-使用 Node.js 22+ 和 pnpm 10+：
 
 ```bash
 pnpm install       # 安装依赖
 pnpm dev           # 启动开发服务器
 pnpm typecheck     # vue-tsc 类型检查
 pnpm lint          # ESLint，要求零 warning / error
-pnpm test          # Vitest 测试
+pnpm test          # Vitest 全量测试
 pnpm build         # 类型检查后执行生产构建
 pnpm preview       # 预览生产构建
 ```
 
-完成代码修改后，至少运行与修改范围相关的测试；涉及 TypeScript、Vue 或路由/状态时，运行 `pnpm typecheck`、`pnpm lint` 和 `pnpm test`。
-
-## 目录职责
-
-```text
-src/
-├── api/                       # 登录、用户、菜单、权限与查询接口封装
-├── components/                # 可复用 Vue 组件
-├── config/                    # 布局、路由与菜单图标配置
-├── hooks/                     # 通用响应式 Hook
-├── layout/                    # 页面壳、导航、Header、Tabs、设置抽屉
-├── mocks/                     # Mock 请求和演示账号数据
-├── router/                    # 静态路由、动态路由和导航守卫
-├── services/                  # HTTP 请求层：request、types、统一导出
-├── store/                     # Pinia stores
-├── styles/                    # Tailwind 与全局 Sass 样式
-├── types/                     # API、菜单、权限、布局和查询类型
-├── utils/                     # 会话工具及通用工具函数
-└── views/                     # 页面级 Vue 组件
-```
-
-当前请求相关文件位于 `src/services`：
-
-- `src/services/index.ts`：请求层公共导出。
-- `src/services/request.ts`：请求、超时、取消、Bearer token、Mock 切换和统一响应处理。
-- `src/services/types.ts`：请求配置和参数类型。
-
-会话相关文件位于 `src/utils`：
-
-- `src/utils/session.ts`：清理会话和退出登录。
-- `src/utils/sessionInitialization.ts`：并发恢复用户、菜单和权限。
-- `src/utils/unauthorized.ts`：合并重复的 401 处理。
-
-## 导入与编码约定
+## 通用编码规范
 
 - 使用 `@/*` 访问 `src/*`，例如 `@/services`、`@/store`、`@/types`。
-- API 模块从 `@/services` 导入 `request`；不要重新实现请求、超时或 token 逻辑。
-- 需要会话、退出或 401 行为时，从对应的 `@/utils/*` 模块导入。
-- 遵守严格 TypeScript 配置：避免 `any`，处理 `undefined`、空值和索引访问；类型导入使用 `import type`。
+- 遵守严格 TypeScript 配置：避免 `any`，优先通过类型收窄处理 `undefined`、空值和索引访问；类型导入使用 `import type`。
+- 不要为了消除类型错误关闭 `strict`、`noUnusedLocals` 或其它既有检查。
 - Vue 单文件组件保持 `template`、`script`、`style` 的顺序，并沿用现有组件风格。
-- 不要为了消除类型错误关闭 `strict`、`noUnusedLocals` 或其他既有检查。
-- 保持现有换行、缩进和单引号风格，修改尽量局部化。
+- 复用已有组件、类型、store、hook 和工具，不重复创建等价抽象。
+- 保持现有换行、缩进、引号和命名风格，修改尽量局部化。
+- 判断数据和状态时优先使用已有类型、类型守卫和项目工具；只有在没有合适抽象时才使用内联 `typeof`、`instanceof` 或类型断言。
+- 不要虚构没有后端契约的 CRUD、字段、权限或接口行为。
+
+## 组件选择与样式优先级
+
+按以下顺序决定组件和样式实现：
+
+1. **先使用项目已有组件**：优先复用 `src/components`、`src/layout` 和现有页面中已经验证过的组件、类型、hook、store 与工具。
+   - 如果已有组件与需求相近但能力不足，可以优先新增必要的 props、slots 或 emits 扩展它。
+   - 扩展必须保持已有 props 的默认行为和已有调用方式不变，不能破坏现有使用；同时补充对应测试。
+2. **再使用 Element Plus 组件**：项目已有组件无法合理复用时，优先使用 Element Plus 提供的组件和能力，不要用原生元素重复实现已有控件。
+3. **最后新增封装**：只有项目已有组件和 Element Plus 都无法满足需求时，才新增业务组件或通用封装；新封装应有明确复用场景，避免为一次性需求增加抽象。
+
+涉及 Element Plus 组件外观时：
+
+- 先查找能否通过 props、slots、CSS 变量或组件提供的 class 属性完成，例如 `size`、`type`、`plain`、`text`、`link`、`border`、`header-class`、`body-class` 和 `style`。
+- 组件能力不足时，如果确实需要修改 Element Plus 内部结构或进行跨组件修改，可以通过语义明确的自定义类名配合局部 `:deep` 选择器实现。
+- 编写样式时优先考虑 Tailwind CSS：通用布局、间距、尺寸、响应式、状态、对齐和可见性样式默认使用 Tailwind utility class，不要先新增 Sass 或自定义 CSS。
+- 使用 Tailwind 无法表达、会破坏 Element Plus 组件结构，或需要接入组件主题能力时，再使用 `var(--el-*)` 等主题 token、组件提供的 class 或局部 CSS；避免在组件内硬编码颜色。
+- 页面和组件样式必须同时考虑浅色和深色主题：检查背景、文字、边框、分割线、阴影、选中态、悬停态、焦点态和禁用态的可见性与对比度；优先使用主题变量，不要只针对浅色主题编写固定颜色。
+- 不使用宽泛的全局 Element Plus 覆盖，不通过修改 `node_modules` 解决样式问题；确需提高优先级时，说明覆盖原因并保持范围最小。
+
+具体约定：
+
+- 实现组件或交互前，统一按“已有封装好的项目组件 → Element Plus → 通用封装”的顺序检查和选择，不要跳过前置选项。
+- 仅用于装饰或布局的 `div`、`span` 可以使用 Tailwind，不要为了替换简单布局引入新的组件抽象。
+- 图标使用 `@element-plus/icons-vue` 或项目已有图标组件，不使用 emoji 作为界面图标。
+- 图标按钮必须有可访问名称；Tooltip 不能替代按钮本身的语义标签。
+- 保留清晰的键盘焦点状态、可操作的点击区域和必要的 `aria-label` / `aria-pressed` / `role` 属性。
+- 主题、暗色模式、主题色和过渡动画必须使用现有 store 与工具，不要在组件内另建一套主题状态。
+- 添加动画时保持短时、可撤销，并尊重 `prefers-reduced-motion`。
+
+## 导入与状态约定
+
+- API 模块从 `@/services` 导入 `request`。
+- 涉及会话、退出或 401 行为时，从对应的 `@/utils/*` 模块导入，不能重复实现清理逻辑。
+- 组件通过 props、emits、slots 和 store 明确传递状态；不要通过隐式全局变量或 DOM 查询同步业务状态。
+- Pinia store 是布局、用户、权限和会话状态的唯一来源；修改状态优先调用已有 action。
+- 事件处理函数应保留正确的值类型，避免用宽泛的 `string | number | boolean` 掩盖实际业务类型。
+- 路由和菜单相关逻辑必须同时考虑静态路由、动态菜单、权限和刷新恢复场景。
 
 ## 业务语义
 
 - `/login` 和 `/whiteList` 是白名单路由，不依赖已初始化的会话。
 - 已知路由但权限不足进入 403；不存在于菜单和静态路由的地址进入 404。
-- 动态菜单已注册但页面组件缺失进入 notMatch。
+- 动态菜单已注册但页面组件缺失进入 `notMatch`。
 - 刷新或直接访问动态 URL 时，用户、菜单和权限会并发恢复并去重。
 - 退出登录或 401 时，必须清理 token、用户、权限、Tabs 和动态路由。
 - 登录回跳只接受站内绝对路径，不允许外部地址、协议相对地址或递归登录地址。
-- 默认环境使用 Mock；真实后端通过环境变量关闭 Mock 并配置 API 前缀。不要在没有后端契约的情况下虚构 CRUD 行为。
+- 默认环境使用 Mock；真实后端通过环境变量关闭 Mock 并配置 API 前缀。
+- 未有后端契约时，不要猜测接口返回结构、分页字段、权限编码或业务状态。
 
-## 测试与修改流程
+## 测试与验证流程
 
-1. 先定位相关页面、API、store、router 和测试，确认现有行为。
-2. 优先复用已有组件、类型、store 和工具，不重复创建等价抽象。
-3. 修改后补充或更新对应的 Vitest 测试；涉及 UI 行为时优先使用现有 `@vue/test-utils` 和 `happy-dom` 配置。
-4. 检查是否需要同步更新路由、菜单、权限和 Mock 数据。
-5. 运行必要的验证命令，并在结果中说明未运行的检查。
+### 修改前
 
-## 边界
+1. 先定位相关页面、组件、API、store、router 和已有测试。
+2. 明确用户可见行为、边界条件和成功标准；存在会改变实现方向的歧义时先说明假设。
+3. 优先复用现有抽象，确认是否需要同步路由、菜单、权限、Mock 或类型。
+
+### 修改后
+
+1. 为新增或修复的业务行为补充或更新对应的 Vitest 测试。
+2. 涉及 UI 行为时优先使用现有 `@vue/test-utils` 和 `happy-dom` 配置；必要时验证键盘、Tooltip、焦点、禁用态和响应式布局。
+3. 涉及 TypeScript、Vue、路由、store 或样式构建时，至少运行：
+
+   ```bash
+   pnpm typecheck
+   pnpm lint
+   pnpm test
+   pnpm build
+   ```
+
+4. 修改范围较小时，可先运行定向测试，再运行与风险匹配的全量检查。
+5. 如果全量测试存在与本次改动无关的已知失败，不要顺手修改无关模块；在交付结果中明确失败文件、断言和未解决原因。
+6. 交付前检查 `git diff --check`，确认没有空白错误、调试输出、临时文件或敏感信息。
+
+## 文档与变更记录
+
+- 用户可见的配置、命令、路由、权限或业务行为发生变化时，评估是否需要同步 README 或相关文档。
+- 普通功能、修复和重构不要求臆造 Changelog；只有用户明确要求发布说明、版本变更或更新日志时才修改对应文件。
+- 文档中的命令、路径、环境变量和脚本名称必须以当前仓库实际内容为准。
+- 代码注释解释业务原因、约束或非显然的取舍，不重复描述代码本身。
+
+## 编码行为准则
+
+这些准则用于减少过度假设、无关重构和不可验证的修改。
+
+### 1. 先思考再编码
+
+- 明确当前理解、假设和成功标准。
+- 存在多种合理解释时列出影响，不要默默选择会改变范围的方案。
+- 如果更简单的实现已经满足需求，优先选择简单方案。
+- 不隐藏不确定性；需要用户选择时，先指出会改变结果的关键差异。
+
+### 2. 简洁优先
+
+- 不实现超出请求范围的功能。
+- 不为只使用一次的逻辑增加过度抽象、可配置项或兼容层。
+- 不处理不可能发生的场景来换取表面上的“完整”。
+- 如果实现明显比需求复杂，先重新检查是否重复造轮子。
+
+### 3. 精准改动
+
+- 每一行改动都应能追溯到用户请求、现有约束或验证需要。
+- 不顺手重构没有问题的相邻代码，不修改用户已有且与任务无关的改动。
+- 只清理由本次改动造成的未使用 import、变量、函数或测试。
+- 使用 `apply_patch` 编辑仓库文件；不要用破坏性 shell 写入覆盖文件。
+
+### 4. 目标驱动执行
+
+把任务转化为可验证的目标：
+
+```text
+1. 明确行为或视觉目标 → 验证：已有测试、截图或可复现步骤
+2. 实现最小改动 → 验证：定向测试和类型检查
+3. 检查集成影响 → 验证：Lint、全量测试和生产构建
+```
+
+示例：
+
+- “修复 Bug” → 先补充能复现问题的测试，再实现修复。
+- “重构组件” → 确保重构前后的公开行为和测试结果一致。
+- “调整 UI” → 验证组件状态、键盘操作、响应式布局和构建产物。
+
+## 安全边界
 
 - 不要修改 `node_modules`、`dist` 或 `design-system`，除非用户明确要求。
-- 不要引入 React、Ant Design、Zustand、TanStack Table 或虚拟表格依赖；这些不属于当前项目范围。
-- 不要提交密钥、真实账号密码或新的环境文件。
-- 不要执行破坏性 Git 操作，例如 `git reset --hard` 或覆盖用户已有改动。
+- 不要自动引入其它不属于当前项目范围的 UI 框架、状态管理、表格或虚拟化依赖。
+- 不要提交密钥、真实账号密码、token、个人数据或新的环境文件。
+- 不要执行 `git reset --hard`、`git checkout --` 或其它会覆盖用户改动的破坏性 Git 操作。
+- 不要删除、移动或覆盖范围不明确的文件；执行删除前必须确认精确目标和可恢复性。
+- 保留工作区中与当前请求无关的已有改动，并在修改前检查冲突范围。
