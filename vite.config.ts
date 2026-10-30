@@ -6,7 +6,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vitest/config'
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
   plugins: [
     vue(),
     tailwindcss(),
@@ -27,6 +27,11 @@ export default defineConfig(({ mode }) => ({
   test: {
     environment: 'happy-dom',
     globals: true,
-    setupFiles: ['./tests/setup.ts']
+    setupFiles: ['./tests/setup.ts'],
+    server: {
+      deps: {
+        inline: ['element-plus']
+      }
+    }
   }
 }))
