@@ -65,6 +65,11 @@ const displayMenus = computed(() =>
     : props.menus
 )
 
+function navigateTo(path: string): void {
+  if (router.currentRoute.value.fullPath === path) return
+  void router.push(path)
+}
+
 function onSelect(path: string) {
   const menu = findMenuByPath(props.menus, path, props.basePath)
   const external = resolveMenuUrl(menu?.meta?.link)
@@ -73,7 +78,7 @@ function onSelect(path: string) {
     const target = props.topLevelOnly && menu?.children?.length
       ? findFirstLeafPath(menu)
       : path
-    void router.push(target ?? path)
+    navigateTo(target ?? path)
   }
   emit('navigate')
 }

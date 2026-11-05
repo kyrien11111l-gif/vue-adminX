@@ -20,9 +20,9 @@
           role="tab"
           :aria-selected="route.path === tab.key"
           :tabindex="route.path === tab.key ? 0 : -1"
-          @click="router.push(tab.key)"
-          @keydown.enter.prevent="router.push(tab.key)"
-          @keydown.space.prevent="router.push(tab.key)"
+          @click="navigateTo(tab.key)"
+          @keydown.enter.prevent="navigateTo(tab.key)"
+          @keydown.space.prevent="navigateTo(tab.key)"
         >
           <span>{{ tab.title }}</span>
           <button
@@ -76,6 +76,11 @@ const layoutStore = useLayoutStore()
 const permissionStore = usePermissionStore()
 const tabsStore = useTabsStore()
 
+async function navigateTo(path: string): Promise<void> {
+  if (route.fullPath === path) return
+  await router.push(path)
+}
+
 function hasClosableOther(key: string): boolean {
   return tabsStore.tabs.some((tab) => tab.key !== key && tab.closable)
 }
@@ -90,7 +95,7 @@ async function closeTab(key: string) {
   const wasActive = route.path === key
   tabsStore.closeTab(key)
   if (wasActive) {
-    await router.push(fallback?.key ?? permissionStore.homePath ?? '/403')
+    await navigateTo(fallback?.key ?? permissionStore.homePath ?? '/403')
   }
 }
 
@@ -101,19 +106,19 @@ async function handleTabMenu(command: string, targetKey: string) {
   }
   if (command === 'close-other') {
     tabsStore.closeOtherTabs(targetKey)
-    if (route.path !== targetKey) await router.push(targetKey)
+    await navigateTo(targetKey)
     return
   }
   if (command === 'close-right') {
     const targetIndex = tabsStore.tabs.findIndex((tab) => tab.key === targetKey)
     const activeIndex = tabsStore.tabs.findIndex((tab) => tab.key === route.path)
     tabsStore.closeRightTabs(targetKey)
-    if (activeIndex > targetIndex) await router.push(targetKey)
+    if (activeIndex > targetIndex) await navigateTo(targetKey)
     return
   }
   if (command === 'close-all') {
     tabsStore.closeAllTabs()
-    await router.push(permissionStore.homePath ?? '/403')
+    await navigateTo(permissionStore.homePath ?? '/403')
   }
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div class="page-shell">
+  <PageContainer>
 
     <el-row :gutter="16">
       <el-col v-for="item in stats" :key="item.label" :xs="24" :sm="12" :xl="6" class="mb-4">
@@ -35,10 +35,11 @@
         </el-card>
       </el-col>
     </el-row>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">
+import { PageContainer } from '@/components/page-container'
 import { DataAnalysis, DocumentChecked, UserFilled, WarningFilled } from '@element-plus/icons-vue'
 
 const stats = [

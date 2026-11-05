@@ -1,6 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import PageContainer from '@/components/page-container/PageContainer.vue'
 import { useLayoutStore } from '@/store'
 
@@ -39,5 +39,31 @@ describe('PageContainer', () => {
 
     await wrapper.setProps({ height: '50vh' })
     expect(wrapper.attributes('style')).toContain('height: 50vh')
+  })
+
+  it('uses min-height instead of a fixed height in compact viewports', async () => {
+    const matchMedia = vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+      matches: query === '(max-width: 991px), (max-height: 640px)',
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn()
+    }))
+    const wrapper = mount(PageContainer)
+    const layoutStore = useLayoutStore()
+
+    await wrapper.vm.$nextTick()
+
+    expect(matchMedia).toHaveBeenCalledWith('(max-width: 991px), (max-height: 640px)')
+    expect(wrapper.attributes('style')).toContain(
+      `min-height: calc(100vh - ${layoutStore.headerHeight + layoutStore.pageTabsHeight}px)`
+    )
+    expect(wrapper.attributes('style')).not.toMatch(/(?:^|;)\s*height:/)
+
+    wrapper.unmount()
+    matchMedia.mockRestore()
   })
 })

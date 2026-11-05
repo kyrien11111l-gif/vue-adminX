@@ -89,7 +89,7 @@
           >
             <router-view v-slot="{ Component }">
               <transition name="page" mode="out-in">
-                <KeepAlive :include="keepAliveRouteNames">
+                <KeepAlive :include="keepAliveRouteNames" :max="KEEP_ALIVE_MAX">
                   <component
                     :is="getRouteViewComponent(Component, route.name)"
                     :key="`${route.fullPath}:${refreshKey}`"
@@ -122,7 +122,8 @@ import {
   MIXED_NAVIGATION,
   SIDE_NAVIGATION,
   TOP_NAVIGATION,
-  TWO_COLUMN_NAVIGATION
+  TWO_COLUMN_NAVIGATION,
+  KEEP_ALIVE_MAX
 } from '@/config/layout'
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout'
 import { useNavigationState } from '@/layout/hooks/useNavigationState'

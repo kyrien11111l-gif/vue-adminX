@@ -178,6 +178,29 @@ watch(
 
 function getFieldProps(field: Exclude<QueryFormField, { type: 'custom' }>) {
   const shared = { clearable: true, ...field.props }
+  if (field.type === 'date') {
+    return { type: 'date', valueFormat: 'YYYY-MM-DD', ...shared }
+  }
+  if (field.type === 'dateRange') {
+    return {
+      type: 'daterange',
+      valueFormat: 'YYYY-MM-DD',
+      rangeSeparator: '至',
+      startPlaceholder: '开始日期',
+      endPlaceholder: '结束日期',
+      ...shared
+    }
+  }
+  if (field.type === 'dateTimeRange') {
+    return {
+      type: 'datetimerange',
+      valueFormat: 'YYYY-MM-DD HH:mm:ss',
+      rangeSeparator: '至',
+      startPlaceholder: '开始时间',
+      endPlaceholder: '结束时间',
+      ...shared
+    }
+  }
   return shared
 }
 

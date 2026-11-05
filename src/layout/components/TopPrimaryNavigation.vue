@@ -36,7 +36,7 @@ function select(menu: MenuItem) {
     return
   }
   const target = findFirstLeafPath(menu)
-  if (target) void router.push(target)
+  if (target && router.currentRoute.value.fullPath !== target) void router.push(target)
 }
 </script>
 
