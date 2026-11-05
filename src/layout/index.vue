@@ -1,5 +1,4 @@
 <template>
-  <a class="skip-link" href="#main-content">跳到主要内容</a>
   <el-container class="relative h-screen bg-[var(--el-bg-color-page)]">
     <aside
       v-if="hasDesktopSidebar"

@@ -43,22 +43,6 @@ body {
   background: var(--el-bg-color);
 }
 
-.skip-link {
-  position: fixed;
-  top: 8px;
-  left: 8px;
-  z-index: 10000;
-  padding: 8px 12px;
-  border-radius: var(--el-border-radius-base);
-  color: var(--el-color-white);
-  background: var(--el-color-primary);
-  transform: translateY(-160%);
-  transition: transform 150ms ease-out;
-
-  &:focus {
-    transform: translateY(0);
-  }
-}
 
 #nprogress {
   position: fixed;
