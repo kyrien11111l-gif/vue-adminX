@@ -9,10 +9,11 @@
     <el-row class="query-form__row" v-bind="resolvedRowProps">
       <el-col
         v-for="field in visibleFields"
-        :key="field.prop"
         :xs="24"
         :sm="12"
+        :lg="7"
         :xl="5"
+        :key="field.prop"
         v-bind="field.colProps"
       >
         <el-form-item class="query-form__item" :label="field.label" :prop="field.prop" v-bind="field.formItemProps">
@@ -47,6 +48,7 @@
         class="query-form__actions"
         :xs="24"
         :sm="12"
+        :lg="4"
         :xl="4"
         v-bind="actionColProps"
       >
