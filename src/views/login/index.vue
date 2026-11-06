@@ -47,7 +47,7 @@ import { reactive, ref } from 'vue'
 import { Lock, User } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { useRoute, useRouter } from 'vue-router'
+import { isNavigationFailure, useRoute, useRouter } from 'vue-router'
 import { login } from '@/api'
 import { useAuthStore } from '@/store'
 import { getSafeRedirectTarget } from '@/utils/navigation'
@@ -72,9 +72,17 @@ async function submit() {
   try {
     const result = await login(form)
     authStore.setToken(result.token)
-    ElMessage.success('登录成功')
+
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : undefined
-    await router.replace(getSafeRedirectTarget(redirect, '/'))
+    const failure = await router.replace(
+      getSafeRedirectTarget(redirect, '/')
+    )
+
+    if (isNavigationFailure(failure) || !authStore.authenticated) {
+      return
+    }
+
+    ElMessage.success('登录成功')
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '登录失败')
   } finally {

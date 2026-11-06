@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { ElMessage } from 'element-plus'
+import { ElNotification } from 'element-plus'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import 'nprogress/nprogress.css'
 import '@/styles/tailwind.css'
@@ -26,7 +26,11 @@ app.directive('permission', permission)
 registerUnauthorizedHandler(async () => {
   const redirect = router.currentRoute.value.fullPath
   resetSession()
-  ElMessage.warning('登录状态已失效，请重新登录')
+  ElNotification.error({
+    title: '提示',
+    message: '登录状态已失效，请重新登录',
+    showClose: true
+  })
   await router.replace(createLoginUrl(redirect))
 })
 

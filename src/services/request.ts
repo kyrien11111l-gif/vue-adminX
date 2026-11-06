@@ -121,7 +121,10 @@ async function execute<T, TData = unknown>(
     : await response.json().catch(() => null) as unknown
 
   if (response.status === 401) {
-    await handleUnauthorizedOnce()
+    const currentToken = useAuthStore().token
+    if (token && currentToken === token) {
+      await handleUnauthorizedOnce()
+    }
     throw requestError('登录状态已失效', 401, 'UNAUTHORIZED')
   }
 

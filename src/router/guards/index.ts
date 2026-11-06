@@ -1,4 +1,4 @@
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElNotification } from 'element-plus'
 import type { Router } from 'vue-router'
 import {
   FORBIDDEN_PATH,
@@ -20,7 +20,6 @@ export function installRouterGuards(router: Router): void {
     const isLogin = to.path === LOGIN_PATH
     const isPublic = WHITE_LIST.has(to.path)
 
-    if (permissionStore.error && to.path === '/initialization-error') return true
     if (isPublic && !isLogin) return true
 
     if (!authStore.token) {
@@ -51,14 +50,12 @@ export function installRouterGuards(router: Router): void {
         }
       } catch (error) {
         if (!useAuthStore().token) return createLoginUrl(to.fullPath)
-        permissionStore.setError(
-          error instanceof Error ? error.message : '应用初始化失败，请稍后重试'
-        )
-        return {
-          path: '/initialization-error',
-          query: { redirect: to.fullPath },
-          replace: true
-        }
+        ElNotification.error({
+          title: '提示',
+          message: error instanceof Error ? error.message : '请稍后重试',
+          showClose: true
+        })
+        return false
       }
     }
 

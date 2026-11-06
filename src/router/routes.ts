@@ -28,12 +28,6 @@ export const staticRoutes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: '/initialization-error',
-    name: 'initialization-error',
-    component: () => import('@/views/error/initialization-error/index.vue'),
-    meta: { title: '初始化失败' }
-  },
-  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/views/error/404/index.vue'),
