@@ -1,36 +1,27 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import { request } from '@/services'
+import { registerUnauthorizedHandler } from '@/utils/unauthorized'
 
-const fetchMock = vi.hoisted(() => vi.fn())
-const handleUnauthorizedOnce = vi.hoisted(() => vi.fn())
-
-vi.mock('@/mocks', () => ({ mockFetch: fetchMock }))
-vi.mock('@/utils/unauthorized', () => ({ handleUnauthorizedOnce }))
-
-import { request } from '@/services/request'
 import { useAuthStore } from '@/store'
 
-function unauthorizedResponse(): Response {
-  return new Response(
-    JSON.stringify({ code: 'UNAUTHORIZED', message: '登录状态已失效', data: null }),
-    { status: 401, headers: { 'Content-Type': 'application/json' } }
-  )
-}
-
 describe('request unauthorized handling', () => {
+  let handledCount = 0
+  let unregister: (() => void) | undefined
+
   beforeEach(() => {
     setActivePinia(createPinia())
     useAuthStore().setToken('same-token')
-    vi.stubGlobal('fetch', fetchMock)
-    handleUnauthorizedOnce.mockImplementation(() => {
+    handledCount = 0
+    unregister = registerUnauthorizedHandler(() => {
+      handledCount += 1
       useAuthStore().clearToken()
     })
-    fetchMock.mockResolvedValue(unauthorizedResponse())
   })
 
   afterEach(() => {
-    vi.clearAllMocks()
-    vi.unstubAllGlobals()
+    unregister?.()
+    unregister = undefined
   })
 
   it('handles only the first 401 after the current token is cleared', async () => {
@@ -40,6 +31,6 @@ describe('request unauthorized handling', () => {
       request.get('/permissions')
     ])
 
-    expect(handleUnauthorizedOnce).toHaveBeenCalledTimes(1)
+    expect(handledCount).toBe(1)
   })
 })

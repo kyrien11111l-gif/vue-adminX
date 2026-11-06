@@ -1,4 +1,5 @@
-import { afterEach, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, vi } from 'vitest'
+import { server } from '@/mocks/server'
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
@@ -21,4 +22,14 @@ class ResizeObserverMock {
 }
 
 Object.defineProperty(window, 'ResizeObserver', { value: ResizeObserverMock })
-afterEach(() => localStorage.clear())
+
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'error' })
+})
+
+afterEach(() => {
+  server.resetHandlers()
+  localStorage.clear()
+})
+
+afterAll(() => server.close())

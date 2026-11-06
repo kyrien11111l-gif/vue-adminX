@@ -20,7 +20,6 @@ showStartupLoading(layoutStore.persistedState)
 
 const app = createApp(App)
 app.use(pinia)
-app.use(router)
 app.directive('permission', permission)
 
 registerUnauthorizedHandler(async () => {
@@ -33,6 +32,20 @@ registerUnauthorizedHandler(async () => {
   })
   await router.replace(createLoginUrl(redirect))
 })
+
+async function startMockWorker(): Promise<void> {
+  if (import.meta.env.VITE_USE_MOCK !== 'true') return
+  const { worker } = await import('@/mocks/browser')
+  await worker.start({ onUnhandledRequest: 'bypass' })
+}
+
+try {
+  await startMockWorker()
+} catch (error) {
+  console.error('Mock 服务启动失败：', error)
+}
+
+app.use(router)
 
 try {
   await router.isReady()

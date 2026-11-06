@@ -2,7 +2,7 @@
 
 AdminX 是一个基于 Vue 3 的后台管理项目，使用 TypeScript 和 Vite 构建。项目提供登录与会话恢复、动态菜单、路由权限、响应式布局、主题设置，以及订单、数据查询和履约报表等管理页面。
 
-项目默认使用仓库内置 Mock 数据，安装依赖后即可启动。需要接入真实服务时，可通过环境变量关闭 Mock，并沿用现有请求层和接口类型。
+项目默认使用 MSW 提供 Mock 数据，安装依赖后即可启动。需要接入真实服务时，可通过环境变量关闭 Mock，并沿用现有请求层和接口类型。
 
 ## 技术栈
 
@@ -33,7 +33,7 @@ pnpm preview    # 预览生产构建
 
 ## Mock 账号
 
-开发环境默认启用 Mock，可以使用以下账号登录：
+开发环境和演示构建默认启用 MSW，可以使用以下账号登录：
 
 | 账号 | 密码 | 可访问范围 |
 | --- | --- | --- |
@@ -46,12 +46,22 @@ pnpm preview    # 预览生产构建
 
 | 变量 | 说明 | 示例 |
 | --- | --- | --- |
-| `VITE_USE_MOCK` | 是否使用内置 Mock 请求 | `true` |
+| `VITE_USE_MOCK` | 是否启用 MSW Mock 请求 | `true` |
 | `VITE_API_PROXY_URL` | API 请求前缀 | `/api` |
 | `VITE_WATERMARK_ENABLED` | 是否显示页面水印 | `true` |
 | `VITE_WATERMARK_CONTENT` | 水印内容 | `AdminX` |
 
-切换真实接口时，将对应环境中的 `VITE_USE_MOCK` 设置为 `false`，并让 `VITE_API_PROXY_URL` 指向可用的 API 前缀。请求统一通过 `src/services/request.ts` 发出，默认携带 Bearer token，并处理超时、取消、统一响应和 401。
+切换真实接口时，将对应环境中的 `VITE_USE_MOCK` 设置为 `false`，并让 `VITE_API_PROXY_URL` 指向可用的 API 前缀。浏览器 Mock 使用 `public/mockServiceWorker.js` 和 `src/mocks/browser.ts`，Vitest 使用 `src/mocks/server.ts`。请求仍统一通过 `src/services/request.ts` 发出，默认携带 Bearer token，并处理超时、取消、统一响应和 401。
+
+构建可独立运行的 Mock 演示包：
+
+```bash
+pnpm typecheck
+pnpm exec vite build --mode demo
+pnpm preview
+```
+
+`demo` 模式读取 `.env.demo`，并在应用启动前等待 MSW worker 就绪。
 
 接口响应使用以下结构：
 
@@ -96,7 +106,7 @@ src/
 ├── directives/           # 权限指令
 ├── hooks/                # 全屏、响应式布局、主题和表格设置 Hook
 ├── layout/               # 页面壳、导航、Header、Tabs 和设置抽屉
-├── mocks/                # Mock 账号、菜单和业务数据
+├── mocks/                # MSW handlers、Mock 账号、菜单和业务数据
 ├── router/               # 静态路由、动态路由和导航守卫
 ├── services/             # 请求封装、超时、取消和响应处理
 ├── store/                # Pinia stores
@@ -109,7 +119,7 @@ tests/                    # Vitest 单元测试
 
 ## Mock 接口
 
-内置 Mock 当前覆盖以下接口：
+MSW 当前覆盖以下接口：
 
 - `POST /login`
 - `GET /user/info`
