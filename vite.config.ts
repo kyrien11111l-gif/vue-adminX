@@ -11,7 +11,7 @@ export default defineConfig(() => ({
   plugins: [
     vue(),
     tailwindcss(),
-    ElementPlus(),
+    ElementPlus({}),
     AutoImport({
       dts: false,
       resolvers: [ElementPlusResolver()],
